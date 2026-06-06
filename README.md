@@ -12,7 +12,7 @@ internal gateways, and custom endpoints. Hot‑switch between all of them
 without restarting your session.
 
 The name comes from the first word you type into any Claude Code or AI agent
-session — **hi**. The agent replies "你好，有什么可以帮助你的？" and the work
+session — **hi**. The agent replies "Hello, how can I help you?" and the work
 begins. Simple, memorable, and fitting for the AI era. May evolve if a better
 name comes along.
 
