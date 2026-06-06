@@ -6,7 +6,7 @@
 
 可连接**任意** Anthropic 兼容 API：Claude、DeepSeek、OpenRouter、内部网关和自定义端点。在同一个 session 中热切换所有后端，无需重启。
 
-名称由来：**DeepSeek-Claude-Code-CLI** → ds-cc-cli → ds-c(cc)li → **hi**（如有更好的名称会换）。
+名称由来：每一次打开 Claude Code 或其他 AI agent 工具，第一句话都是从一句 **hi** 开始。AI 回复"你好，有什么可以帮助你的？"——然后工作就开始了。简单、好记、贴合 AI 时代。如有更好的名称也会更换。
 
 ## 快速开始
 

@@ -11,7 +11,10 @@ Connect to **any** Anthropic‑compatible API: Claude, DeepSeek, OpenRouter,
 internal gateways, and custom endpoints. Hot‑switch between all of them
 without restarting your session.
 
-The name comes from: **DeepSeek-Claude-Code-CLI** → ds-cc-cli → ds-c(cc)li → **hi** (may change if a better one turns up).
+The name comes from the first word you type into any Claude Code or AI agent
+session — **hi**. The agent replies "你好，有什么可以帮助你的？" and the work
+begins. Simple, memorable, and fitting for the AI era. May evolve if a better
+name comes along.
 
 ### Quick start
 
