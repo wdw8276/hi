@@ -22,6 +22,19 @@ name comes along.
 
 - [Claude Code](https://code.claude.com/docs/en/quickstart#step-1-install-claude-code) installed and logged in
 - **hi binary** — download from [Releases](https://github.com/wdw8276/hi/releases) (recommended) or [build from source](https://github.com/wdw8276/hi#building-from-source)
+- **API key** — hi works with any Anthropic-compatible endpoint. You need an API key from one of:
+  - [Anthropic Console](https://console.anthropic.com/) — Claude API key
+  - [DeepSeek Platform](https://platform.deepseek.com/api_keys) — DeepSeek API key
+  - Your organization's internal API gateway
+
+### Install (Linux / macOS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
+```
+
+This downloads the latest release binary and installs it to `/usr/local/bin/hi`
+(or `~/.local/bin/hi` if `/usr/local/bin` requires `sudo`).
 
 ### Run
 

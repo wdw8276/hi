@@ -14,6 +14,19 @@
 
 - [Claude Code](https://code.claude.com/docs/en/quickstart#step-1-install-claude-code) 已安装并登录
 - **hi 二进制文件** — 推荐从 [Releases](https://github.com/wdw8276/hi/releases) 下载，或[从源码构建](https://github.com/wdw8276/hi#building-from-source)
+- **API key** — hi 兼容任意 Anthropic 兼容端点，你需要以下任一 API key：
+  - [Anthropic Console](https://console.anthropic.com/) — Claude API key
+  - [DeepSeek Platform](https://platform.deepseek.com/api_keys) — DeepSeek API key
+  - 你所在组织的内部 API 网关 key
+
+### 安装（Linux / macOS）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
+```
+
+以上命令会下载最新 release 二进制文件并安装到 `/usr/local/bin/hi`
+（如果 `/usr/local/bin` 需要 `sudo`，则安装到 `~/.local/bin/hi`）。
 
 ### 运行
 
