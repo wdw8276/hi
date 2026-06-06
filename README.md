@@ -94,7 +94,7 @@ hi status
 
 | Option | Default | Description |
 |------|--------|------|
-| ``-b, --backend <name>`` | `claude` | Backend: `claude` / `deepseek` |
+| ``-b, --backend <name>`` | `deepseek` | Backend: `claude` / `deepseek` |
 | ``--log-file <path>`` | `~/.hi/logs/hi.log` | Log file path (auto-rotated by date) |
 | ``--log-level <level>`` | `info` | Log level: `debug` / `info` / `warn` / `error` |
 | `--preserve-statusline` | — | Keep existing statusLine command (don't replace with hi) |
@@ -131,7 +131,7 @@ automatically:
 First run of `hi status` auto-generates `~/.hi/config.yaml`:
 
 ```yaml
-active_backend: claude
+active_backend: deepseek
 proxy_port: 18799
 
 backends:
@@ -151,6 +151,7 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
+    strip_thinking: true     # remove top-level thinking config
     pricing:
       input: 0.42
       output: 0.83
@@ -216,6 +217,7 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
+    strip_thinking: true
     pricing: { input: 0.42, output: 0.83 }
     models:
       opus: deepseek-v4-pro
@@ -227,6 +229,7 @@ backends:
     type: anthropic
     base_url: https://llm.internal.example.com
     api_key: "${INTERNAL_API_KEY}"
+    strip_thinking: true      # enable if the gateway enforces thinking consistency
     pricing: { input: 0.50, output: 1.00 }
     models:
       opus: claude-opus-4-8
@@ -236,7 +239,8 @@ backends:
 
 Key points:
 - `type: anthropic` — for Anthropic‑compatible API endpoints
-- `type: deepseek` — strips thinking blocks before forwarding
+- `type: deepseek` — strips the top-level `thinking` config before forwarding (avoids `reasoning_effort` compatibility errors), preserves content‑level thinking blocks
+- `strip_thinking` — `true` / `false`, overrides the per‑type default (`true` for `deepseek`, `false` for `anthropic`)
 - `api_key` — supports `${ENV_VAR}` expansion or literal keys
 - `models.opus/sonnet/haiku` — maps Claude model names to backend‑specific IDs
 - `pricing` — USD per 1M tokens, used by cost tracking

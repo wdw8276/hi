@@ -85,7 +85,7 @@ hi status
 
 | 选项 | 默认值 | 说明 |
 |------|--------|------|
-| ``-b, --backend <name>`` | `claude` | 后端: `claude` / `deepseek` |
+| ``-b, --backend <name>`` | `deepseek` | 后端: `claude` / `deepseek` |
 | ``--log-file <path>`` | `~/.hi/logs/hi.log` | 日志文件路径（按天自动轮转） |
 | ``--log-level <level>`` | `info` | 日志级别: `debug` / `info` / `warn` / `error` |
 | `--preserve-statusline` | — | 保留已有的 statusLine 命令（不替换为 hi） |
@@ -118,7 +118,7 @@ tail -f /tmp/hi-$(date +%F).log | grep -E "#[0-9]|Control:|backend |env:"
 首次运行 `hi status` 会自动生成 `~/.hi/config.yaml`：
 
 ```yaml
-active_backend: claude
+active_backend: deepseek
 proxy_port: 18799
 
 backends:
@@ -138,6 +138,7 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
+    strip_thinking: true     # 移除顶层 thinking 配置
     pricing:
       input: 0.42
       output: 0.83
@@ -199,6 +200,7 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
+    strip_thinking: true
     pricing: { input: 0.42, output: 0.83 }
     models:
       opus: deepseek-v4-pro
@@ -210,6 +212,7 @@ backends:
     type: anthropic
     base_url: https://llm.internal.example.com
     api_key: "${INTERNAL_API_KEY}"
+    strip_thinking: true      # 如果网关强制 thinking 一致性，开启此项
     pricing: { input: 0.50, output: 1.00 }
     models:
       opus: claude-opus-4-8
@@ -219,7 +222,8 @@ backends:
 
 要点：
 - `type: anthropic` — 适用于 Anthropic 兼容的 API 端点
-- `type: deepseek` — 转发前会剥离 thinking block
+- `type: deepseek` — 转发前剥离顶层 `thinking` 配置（避免 `reasoning_effort` 兼容性错误），保留 content 级 thinking 块
+- `strip_thinking` — `true` / `false`，覆盖按类型的默认值（`deepseek` 默认 `true`，`anthropic` 默认 `false`）
 - `api_key` — 支持 `${ENV_VAR}` 展开或直接填写 key
 - `models.opus/sonnet/haiku` — 将 Claude 模型名映射到后端实际模型 ID
 - `pricing` — 每百万 token 的 USD 价格，用于成本追踪
