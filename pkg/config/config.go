@@ -125,6 +125,21 @@ type BackendConfig struct {
 	Models ModelMapping `yaml:"models"`
 	// Pricing is the cost in USD per 1M input/output tokens.
 	Pricing PricingPerMillion `yaml:"pricing"`
+	// StripThinking removes the top-level "thinking" config from requests
+	// before forwarding. Some backends (e.g. DeepSeek) require every
+	// request in a conversation to have the same thinking enabled/disabled
+	// state, and Claude Code's tool-use requests may break this invariant.
+	// Default based on backend type: true for "deepseek", false for "anthropic".
+	StripThinking *bool `yaml:"strip_thinking,omitempty"`
+}
+
+// ShouldStripThinking returns whether the top-level "thinking" config should be
+// stripped. If unset, defaults to true for deepseek and false for anthropic.
+func (b BackendConfig) ShouldStripThinking() bool {
+	if b.StripThinking != nil {
+		return *b.StripThinking
+	}
+	return b.Type == "deepseek"
 }
 
 // Config is the root configuration structure.

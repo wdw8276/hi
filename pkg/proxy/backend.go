@@ -30,8 +30,13 @@ type Backend interface {
 	MapModel(model string) string
 
 	// NeedsThinkingStrip returns true if thinking blocks must be removed
-	// before forwarding requests to this backend.
+	// from message content[] before forwarding.
 	NeedsThinkingStrip() bool
+
+	// StripTopLevelThinking returns true if the top-level "thinking" request
+	// field should be removed before forwarding. Defaults to config value:
+	// true for deepseek, false for anthropic.
+	StripTopLevelThinking() bool
 
 	// ModelInfo returns the backend's tier model names for logging.
 	ModelInfo() map[string]string
@@ -54,10 +59,11 @@ func NewBackend(name string, cfg config.BackendConfig) (Backend, error) {
 // ==============================
 
 type anthropicBackend struct {
-	name     string
-	target   *url.URL
-	apiKey   string
-	modelMap map[string]string
+	name            string
+	target          *url.URL
+	apiKey          string
+	modelMap        map[string]string
+	stripTopThink   bool
 }
 
 func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBackend, error) {
@@ -83,9 +89,10 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 		name, u.String(), authMethod(hasKey, apiKey), maskKeyLog(apiKey))
 
 	return &anthropicBackend{
-		name:   name,
-		target: u,
-		apiKey: apiKey,
+		name:          name,
+		target:        u,
+		apiKey:        apiKey,
+		stripTopThink: cfg.ShouldStripThinking(),
 		modelMap: map[string]string{
 			"claude-opus-4-6":            cfg.Models.Opus,
 			"claude-opus-4-7":            cfg.Models.Opus,
@@ -98,7 +105,8 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 }
 
 func (b *anthropicBackend) Name() string             { return b.name }
-func (b *anthropicBackend) NeedsThinkingStrip() bool { return false }
+func (b *anthropicBackend) NeedsThinkingStrip() bool    { return false }
+func (b *anthropicBackend) StripTopLevelThinking() bool { return b.stripTopThink }
 
 func (b *anthropicBackend) TargetURL() *url.URL { return b.target }
 
@@ -129,10 +137,11 @@ func (b *anthropicBackend) ModelInfo() map[string]string {
 // ==============================
 
 type deepseekBackend struct {
-	name     string
-	target   *url.URL
-	apiKey   string
-	modelMap map[string]string
+	name          string
+	target        *url.URL
+	apiKey        string
+	modelMap      map[string]string
+	stripTopThink bool
 }
 
 func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend, error) {
@@ -152,9 +161,10 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 		name, u.String(), authMethod(hasKey, apiKey), maskKeyLog(apiKey))
 
 	return &deepseekBackend{
-		name:   name,
-		target: u,
-		apiKey: apiKey,
+		name:          name,
+		target:        u,
+		apiKey:        apiKey,
+		stripTopThink: cfg.ShouldStripThinking(),
 		modelMap: map[string]string{
 			"claude-opus-4-6":            cfg.Models.Opus,
 			"claude-opus-4-7":            cfg.Models.Opus,
@@ -167,7 +177,8 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 }
 
 func (b *deepseekBackend) Name() string             { return b.name }
-func (b *deepseekBackend) NeedsThinkingStrip() bool { return false }
+func (b *deepseekBackend) NeedsThinkingStrip() bool    { return false }
+func (b *deepseekBackend) StripTopLevelThinking() bool { return b.stripTopThink }
 
 func (b *deepseekBackend) TargetURL() *url.URL { return b.target }
 

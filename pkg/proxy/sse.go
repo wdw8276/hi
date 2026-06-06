@@ -33,7 +33,20 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		}
 	}
 
-	// Strip thinking blocks.
+	// Strip top-level thinking config. Some backends (e.g. DeepSeek) require
+	// once thinking is enabled, ALL subsequent requests must also have it —
+	// but Claude Code's tool-use requests (web search, fetch) may omit it.
+	// Removing the top-level config avoids the "thinking options type cannot
+	// be disabled when reasoning_effort is set" error.
+	if backend.StripTopLevelThinking() {
+		if _, ok := parsed["thinking"]; ok {
+			delete(parsed, "thinking")
+			changed = true
+			logx.Debug("Stripped top-level thinking config (backend: %s)", activeName)
+		}
+	}
+
+	// Strip thinking blocks from message content.
 	if backend.NeedsThinkingStrip() {
 		if messages, ok := parsed["messages"].([]interface{}); ok {
 			for _, msg := range messages {
