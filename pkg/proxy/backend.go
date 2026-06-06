@@ -167,7 +167,7 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 }
 
 func (b *deepseekBackend) Name() string             { return b.name }
-func (b *deepseekBackend) NeedsThinkingStrip() bool { return true }
+func (b *deepseekBackend) NeedsThinkingStrip() bool { return false }
 
 func (b *deepseekBackend) TargetURL() *url.URL { return b.target }
 
