@@ -1,11 +1,11 @@
 #!/bin/sh
-# dscli — one-line installer
+# hi — one-line installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
 
 set -e
 
 REPO="wdw8276/hi"
-BIN="dscli"
+BIN="hi"
 
 # Detect OS and architecture.
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -31,16 +31,16 @@ fi
 VERSION="${TAG#v}"
 
 if [ "$OS" = "windows" ]; then
-    ARCHIVE="dscli-${VERSION}-windows-amd64.zip"
+    ARCHIVE="hi-${VERSION}-windows-amd64.zip"
     EXT=".exe"
 else
-    ARCHIVE="dscli-${VERSION}-${OS}-${ARCH}.tar.gz"
+    ARCHIVE="hi-${VERSION}-${OS}-${ARCH}.tar.gz"
     EXT=""
 fi
 
 URL="https://github.com/$REPO/releases/download/$TAG/$ARCHIVE"
 
-echo "Downloading dscli $TAG for $OS/$ARCH..."
+echo "Downloading hi $TAG for $OS/$ARCH..."
 curl -fsSL "$URL" -o "$ARCHIVE"
 
 if [ "$OS" = "windows" ]; then
@@ -61,10 +61,10 @@ if [ "$OS" != "windows" ]; then
         install -m 755 "$BIN" "$INSTALL_DIR/$BIN"
     fi
     echo ""
-    echo "dscli $TAG installed to $INSTALL_DIR/$BIN"
+    echo "hi $TAG installed to $INSTALL_DIR/hi"
     echo "Run: hi launch"
 else
     echo ""
-    echo "dscli $TAG downloaded."
+    echo "hi $TAG downloaded."
     echo "Run: .\\$BIN$EXT launch"
 fi
