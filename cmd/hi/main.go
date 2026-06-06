@@ -41,11 +41,11 @@ Options:
   --preserve-statusline  Keep the existing statusLine command (don't replace with hi)
 
 Examples:
-  dscli                                          # Launch proxy + Claude Code with Claude
-  dscli launch --backend claude --log-level debug # Launch with Claude, debug logging
-  dscli proxy --log-file /tmp/hi.log           # Proxy only, log to file
-  dscli agent --backend deepseek                 # Attach CC to existing proxy
-  dscli status                                    # Show config
+  hi                                          # Launch proxy + Claude Code with Claude
+  hi launch --backend claude --log-level debug # Launch with Claude, debug logging
+  hi proxy --log-file /tmp/hi.log           # Proxy only, log to file
+  hi agent --backend deepseek                 # Attach CC to existing proxy
+  hi status                                    # Show config
 `
 
 var (
@@ -189,7 +189,7 @@ func mustHomeDir() string {
 }
 
 // cmdStatusline reads Claude Code status JSON from stdin, replaces the model
-// with the dscli proxy's active backend model, then delegates to the original
+// with the hi proxy's active backend model, then delegates to the original
 // status line script for the rest (cost, cache, balance).
 func cmdStatusline() {
 	stdinData, _ := io.ReadAll(os.Stdin)

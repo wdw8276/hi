@@ -1,21 +1,3 @@
 # Binary
 /hi
 dist/
-
-# Project docs (local only)
-PROJECT.md
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Go
-*.test
-*.out
-hi
