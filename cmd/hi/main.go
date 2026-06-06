@@ -34,7 +34,7 @@ Commands:
   version     Print version
 
 Options:
-  -b, --backend <name>   Backend to use (default: claude)
+  -b, --backend <name>   Backend to use (default: deepseek)
   -p, --port <port>      Proxy port (default: 18799)
   --log-level <level>    debug | info | warn | error (default: info)
   --log-file <path>      Write logs to file (default: ~/.hi/logs/hi.log)
@@ -165,7 +165,7 @@ func cmdInitConfig() {
 	}
 
 	cfg := config.DefaultConfig()
-	cfg.ActiveBackend = "claude"
+	cfg.ActiveBackend = "deepseek"
 	bc := cfg.Backends["claude"]
 	bc.BaseURL = baseURL
 	bc.APIKey = apiKeyRef

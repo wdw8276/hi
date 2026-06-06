@@ -165,7 +165,7 @@ func DefaultBackends() map[string]BackendConfig {
 // DefaultConfig returns a Config with sensible defaults.
 func DefaultConfig() *Config {
 	return &Config{
-		ActiveBackend: "claude",
+		ActiveBackend: "deepseek",
 		ProxyPort:     18799,
 		Backends:      DefaultBackends(),
 	}
