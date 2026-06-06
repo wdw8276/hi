@@ -1,4 +1,4 @@
-# dscli — goreleaser config
+# hi — goreleaser config
 # https://goreleaser.com
 
 version: 2
@@ -8,9 +8,9 @@ before:
     - go mod tidy
 
 builds:
-  - id: dscli
-    main: ./cmd/dscli/
-    binary: dscli
+  - id: hi
+    main: ./cmd/hi/
+    binary: hi
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.buildTime={{.CommitDate}}
     env:
