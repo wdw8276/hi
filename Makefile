@@ -1,4 +1,4 @@
-# dscli — Claude Code multi-backend proxy
+# hi — Claude Code multi-backend proxy
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "1.0.0")
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS := -s -w -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME)
@@ -12,15 +12,15 @@ GOFMT := gofmt
 all: build
 
 build:
-	$(GO) build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/dscli/
+	$(GO) build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/hi/
 
 # Cross-platform release builds.
 dist:
-	GOOS=linux   GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-linux-amd64   ./cmd/dscli/
-	GOOS=linux   GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-linux-arm64   ./cmd/dscli/
-	GOOS=darwin  GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-darwin-amd64  ./cmd/dscli/
-	GOOS=darwin  GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-darwin-arm64  ./cmd/dscli/
-	GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-windows-amd64.exe ./cmd/dscli/
+	GOOS=linux   GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-linux-amd64   ./cmd/hi/
+	GOOS=linux   GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-linux-arm64   ./cmd/hi/
+	GOOS=darwin  GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-darwin-amd64  ./cmd/hi/
+	GOOS=darwin  GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-darwin-arm64  ./cmd/hi/
+	GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/$(BIN)-windows-amd64.exe ./cmd/hi/
 	@echo ""
 	@echo "Builds complete:"
 	@ls -lh dist/
