@@ -94,7 +94,7 @@ hi status
 
 | Option | Default | Description |
 |------|--------|------|
-| ``-b, --backend <name>`` | `deepseek` | Backend: `claude` / `deepseek` |
+| ``-b, --backend <name>`` | — | Backend: `claude` / `deepseek` |
 | ``--log-file <path>`` | `~/.hi/logs/hi.log` | Log file path (auto-rotated by date) |
 | ``--log-level <level>`` | `info` | Log level: `debug` / `info` / `warn` / `error` |
 | `--preserve-statusline` | — | Keep existing statusLine command (don't replace with hi) |

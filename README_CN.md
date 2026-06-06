@@ -85,7 +85,7 @@ hi status
 
 | 选项 | 默认值 | 说明 |
 |------|--------|------|
-| ``-b, --backend <name>`` | `deepseek` | 后端: `claude` / `deepseek` |
+| ``-b, --backend <name>`` | — | 后端: `claude` / `deepseek` |
 | ``--log-file <path>`` | `~/.hi/logs/hi.log` | 日志文件路径（按天自动轮转） |
 | ``--log-level <level>`` | `info` | 日志级别: `debug` / `info` / `warn` / `error` |
 | `--preserve-statusline` | — | 保留已有的 statusLine 命令（不替换为 hi） |
