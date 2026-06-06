@@ -36,6 +36,23 @@ curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
 This downloads the latest release binary and installs it to `/usr/local/bin/hi`
 (or `~/.local/bin/hi` if `/usr/local/bin` requires `sudo`).
 
+### Install (Windows)
+
+**PowerShell:**
+
+```powershell
+irm https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.ps1 | iex
+```
+
+**CMD:**
+
+```batch
+curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+Installs to `%USERPROFILE%\.local\bin\hi.exe` and adds the directory to your
+user PATH. Restart your terminal after installation.
+
 ### Run
 
 ```bash

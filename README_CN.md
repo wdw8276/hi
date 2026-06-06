@@ -28,6 +28,22 @@ curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
 以上命令会下载最新 release 二进制文件并安装到 `/usr/local/bin/hi`
 （如果 `/usr/local/bin` 需要 `sudo`，则安装到 `~/.local/bin/hi`）。
 
+### 安装（Windows）
+
+**PowerShell：**
+
+```powershell
+irm https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.ps1 | iex
+```
+
+**CMD：**
+
+```batch
+curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+安装到 `%USERPROFILE%\.local\bin\hi.exe` 并自动添加到用户 PATH。安装后重启终端即可使用。
+
 ### 运行
 
 ```bash
