@@ -7,8 +7,6 @@ param(
     [string]$InstallDir = ""
 )
 
-$ErrorActionPreference = "Stop"
-
 # Ensure TLS 1.2 for older Windows / PowerShell versions.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -21,8 +19,9 @@ try {
     $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
     $Tag = $Release.tag_name
 } catch {
-    Write-Error "Failed to fetch latest release from GitHub. Check your internet connection."
-    exit 1
+    Write-Host "ERROR: Failed to fetch latest release from GitHub."
+    Write-Host "Check your internet connection and try again."
+    return
 }
 
 $Version = $Tag -replace '^v', ''
@@ -40,7 +39,7 @@ try {
 } catch {}
 if ($currentVersion -eq $Version) {
     Write-Host "hi $Tag is already installed and up to date."
-    exit 0
+    return
 }
 
 if ($currentVersion) {
@@ -49,14 +48,15 @@ if ($currentVersion) {
     Write-Host "Installing hi $Tag for windows/$Arch..."
 }
 
-# Download to temp name to avoid file-lock issues.
+# Download.
 $Archive = "hi-${Version}-windows-${Arch}.zip"
 $Url = "https://github.com/$Repo/releases/download/$Tag/$Archive"
-$TmpBin = Join-Path $InstallDir "hi_new.exe"
+$TmpDir = "$env:TEMP\hi-install-$Version"
+$TmpBin = Join-Path $TmpDir $Bin
 
-Invoke-WebRequest -Uri $Url -OutFile $Archive
-Expand-Archive -Path $Archive -DestinationPath . -Force
-Remove-Item $Archive
+New-Item -ItemType Directory -Path $TmpDir -Force | Out-Null
+Invoke-WebRequest -Uri $Url -OutFile (Join-Path $TmpDir $Archive)
+Expand-Archive -Path (Join-Path $TmpDir $Archive) -DestinationPath $TmpDir -Force
 
 # Ensure install directory exists.
 if (-not (Test-Path $InstallDir)) {
@@ -66,24 +66,27 @@ if (-not (Test-Path $InstallDir)) {
 # Check for running hi processes — cannot replace if in use.
 $running = Get-Process hi -ErrorAction SilentlyContinue
 if ($running) {
-    Write-Warning "hi is currently running (PID: $($running.Id))."
-    Write-Warning "Stop it first (Ctrl+C in the Claude Code terminal), then run this script again."
-    Remove-Item $Bin -Force -ErrorAction SilentlyContinue
-    exit 1
+    Write-Host ""
+    Write-Host "WARNING: hi is currently running (PID: $($running.Id))."
+    Write-Host "Stop it first (Ctrl+C in the Claude Code terminal), then run this script again."
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+    return
 }
 
 # Replace binary.
-Move-Item -Force $Bin $TmpBin
+Move-Item -Force (Join-Path $TmpDir $Bin) $TmpBin
 try {
     Remove-Item $Dest -Force -ErrorAction SilentlyContinue
     Move-Item -Force $TmpBin $Dest
 } catch {
-    Write-Warning "Could not replace $Dest — file may be in use."
-    Write-Warning "Close all Claude Code / hi sessions and run this script again."
+    Write-Host ""
+    Write-Host "WARNING: Could not replace $Dest — file may be in use."
+    Write-Host "Close all Claude Code / hi sessions and run this script again."
     Remove-Item $TmpBin -Force -ErrorAction SilentlyContinue
     Remove-Item $Bin -Force -ErrorAction SilentlyContinue
-    exit 1
+    return
 }
+Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "hi $Tag installed to $Dest"
