@@ -59,8 +59,11 @@ hi
 # 或不写配置文件，通过环境变量传入 API key
 ANTHROPIC_API_KEY=sk-xxx DEEPSEEK_API_KEY=sk-xxx hi
 
-# Windows 环境变量方式
+# Windows PowerShell
 $env:ANTHROPIC_API_KEY="sk-xxx"; $env:DEEPSEEK_API_KEY="sk-xxx"; hi
+
+# Windows CMD
+set ANTHROPIC_API_KEY=sk-xxx && set DEEPSEEK_API_KEY=sk-xxx && hi
 
 # 将额外的 agent 附加到已运行的代理
 hi cc

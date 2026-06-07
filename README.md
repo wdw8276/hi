@@ -68,8 +68,11 @@ hi
 # Or with inline API keys (no config file needed)
 ANTHROPIC_API_KEY=sk-xxx DEEPSEEK_API_KEY=sk-xxx hi
 
-# Windows: set env vars then launch
+# Windows PowerShell
 $env:ANTHROPIC_API_KEY="sk-xxx"; $env:DEEPSEEK_API_KEY="sk-xxx"; hi
+
+# Windows CMD
+set ANTHROPIC_API_KEY=sk-xxx && set DEEPSEEK_API_KEY=sk-xxx && hi
 
 # Attach additional agents to an already-running proxy
 hi cc
