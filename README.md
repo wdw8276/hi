@@ -131,7 +131,7 @@ automatically:
 First run of `hi status` auto-generates `~/.hi/config.yaml`:
 
 ```yaml
-active_backend: claude
+active_backend: deepseek
 proxy_port: 18799
 
 backends:
@@ -139,6 +139,7 @@ backends:
     type: anthropic
     base_url: https://api.anthropic.com
     api_key: "${ANTHROPIC_API_KEY}"
+    strip_thinking: true
     pricing:
       input: 3.00
       output: 15.00
@@ -151,6 +152,7 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
+    strip_thinking: true     # remove top-level thinking config
     pricing:
       input: 0.42
       output: 0.83
