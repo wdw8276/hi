@@ -58,9 +58,15 @@ del "%ARCHIVE%"
 REM Ensure install directory exists.
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 
-REM Stop running hi processes.
-taskkill /f /im hi.exe >nul 2>&1
-timeout /t 2 /nobreak >nul
+REM Check for running hi processes — cannot replace if in use.
+tasklist /fi "imagename eq hi.exe" 2>nul | find /i "hi.exe" >nul
+if %errorlevel% equ 0 (
+    echo.
+    echo WARNING: hi.exe is currently running.
+    echo Stop it first ^(Ctrl+C in the Claude Code terminal^), then run this script again.
+    del "%BIN%" >nul 2>&1
+    exit /b 1
+)
 
 REM Replace binary.
 move /Y "%BIN%" "%DEST%" >nul 2>&1

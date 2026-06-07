@@ -60,12 +60,13 @@ if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 }
 
-# Stop running hi processes so we can replace the binary.
+# Check for running hi processes — cannot replace if in use.
 $running = Get-Process hi -ErrorAction SilentlyContinue
 if ($running) {
-    Write-Host "Stopping running hi processes..."
-    $running | Stop-Process -Force
-    Start-Sleep -Seconds 2
+    Write-Warning "hi is currently running (PID: $($running.Id))."
+    Write-Warning "Stop it first (Ctrl+C in the Claude Code terminal), then run this script again."
+    Remove-Item $Bin -Force -ErrorAction SilentlyContinue
+    exit 1
 }
 
 # Replace binary.
