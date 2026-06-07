@@ -13,7 +13,7 @@
 ### 前置条件
 
 - [Claude Code](https://code.claude.com/docs/en/quickstart#step-1-install-claude-code) 已安装并登录
-- **hi 二进制文件** — 推荐从 [Releases](https://github.com/wdw8276/hi/releases) 下载，或[从源码构建](https://github.com/wdw8276/hi#building-from-source)
+- **hi 二进制文件** — 推荐从 [Releases](https://github.com/mars-base/hi/releases) 下载，或[从源码构建](https://github.com/mars-base/hi#building-from-source)
 - **API key** — hi 兼容任意 Anthropic 兼容端点，你需要以下任一 API key：
   - [Anthropic Console](https://console.anthropic.com/) — Claude API key
   - [DeepSeek Platform](https://platform.deepseek.com/api_keys) — DeepSeek API key
@@ -22,7 +22,7 @@
 ### 安装（Linux / macOS）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install.sh | sh
 ```
 
 以上命令会下载最新 release 二进制文件并安装到 `/usr/local/bin/hi`
@@ -33,13 +33,13 @@ curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
 **PowerShell：**
 
 ```powershell
-irm https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/mars-base/hi/main/install-windows.ps1 | iex
 ```
 
 **CMD：**
 
 ```batch
-curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
+curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 安装到 `%USERPROFILE%\.local\bin\hi.exe` 并自动添加到用户 PATH。安装后重启终端即可使用。
@@ -483,7 +483,7 @@ Backends:
 需要 [Go 1.25+](https://go.dev/dl/)。
 
 ```bash
-git clone https://github.com/wdw8276/hi.git
+git clone https://github.com/mars-base/hi.git
 cd hi
 make build
 make install

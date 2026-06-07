@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wdw8276/hi/pkg/config"
-	"github.com/wdw8276/hi/pkg/logx"
+	"github.com/mars-base/hi/pkg/config"
+	"github.com/mars-base/hi/pkg/logx"
 )
 
 // backendTokens tracks token usage for a single backend.

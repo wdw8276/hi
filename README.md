@@ -21,7 +21,7 @@ name comes along.
 ### Prerequisites
 
 - [Claude Code](https://code.claude.com/docs/en/quickstart#step-1-install-claude-code) installed and logged in
-- **hi binary** — download from [Releases](https://github.com/wdw8276/hi/releases) (recommended) or [build from source](https://github.com/wdw8276/hi#building-from-source)
+- **hi binary** — download from [Releases](https://github.com/mars-base/hi/releases) (recommended) or [build from source](https://github.com/mars-base/hi#building-from-source)
 - **API key** — hi works with any Anthropic-compatible endpoint. You need an API key from one of:
   - [Anthropic Console](https://console.anthropic.com/) — Claude API key
   - [DeepSeek Platform](https://platform.deepseek.com/api_keys) — DeepSeek API key
@@ -30,7 +30,7 @@ name comes along.
 ### Install (Linux / macOS)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install.sh | sh
 ```
 
 This downloads the latest release binary and installs it to `/usr/local/bin/hi`
@@ -41,13 +41,13 @@ This downloads the latest release binary and installs it to `/usr/local/bin/hi`
 **PowerShell:**
 
 ```powershell
-irm https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/mars-base/hi/main/install-windows.ps1 | iex
 ```
 
 **CMD:**
 
 ```batch
-curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
+curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 Installs to `%USERPROFILE%\.local\bin\hi.exe` and adds the directory to your
@@ -94,7 +94,7 @@ hi status
 
 | Option | Default | Description |
 |------|--------|------|
-| ``-b, --backend <name>`` | — | Backend: `claude` / `deepseek` |
+| ``-b, --backend <name>`` | `claude` | Backend: `claude` / `deepseek` |
 | ``--log-file <path>`` | `~/.hi/logs/hi.log` | Log file path (auto-rotated by date) |
 | ``--log-level <level>`` | `info` | Log level: `debug` / `info` / `warn` / `error` |
 | `--preserve-statusline` | — | Keep existing statusLine command (don't replace with hi) |
@@ -131,7 +131,7 @@ automatically:
 First run of `hi status` auto-generates `~/.hi/config.yaml`:
 
 ```yaml
-active_backend: deepseek
+active_backend: claude
 proxy_port: 18799
 
 backends:
@@ -151,7 +151,6 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
-    strip_thinking: true     # remove top-level thinking config
     pricing:
       input: 0.42
       output: 0.83
@@ -217,7 +216,6 @@ backends:
     type: deepseek
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
-    strip_thinking: true
     pricing: { input: 0.42, output: 0.83 }
     models:
       opus: deepseek-v4-pro
@@ -229,7 +227,6 @@ backends:
     type: anthropic
     base_url: https://llm.internal.example.com
     api_key: "${INTERNAL_API_KEY}"
-    strip_thinking: true      # enable if the gateway enforces thinking consistency
     pricing: { input: 0.50, output: 1.00 }
     models:
       opus: claude-opus-4-8
@@ -239,8 +236,7 @@ backends:
 
 Key points:
 - `type: anthropic` — for Anthropic‑compatible API endpoints
-- `type: deepseek` — strips the top-level `thinking` config before forwarding (avoids `reasoning_effort` compatibility errors), preserves content‑level thinking blocks
-- `strip_thinking` — `true` / `false`, overrides the per‑type default (`true` for `deepseek`, `false` for `anthropic`)
+- `type: deepseek` — strips thinking blocks before forwarding
 - `api_key` — supports `${ENV_VAR}` expansion or literal keys
 - `models.opus/sonnet/haiku` — maps Claude model names to backend‑specific IDs
 - `pricing` — USD per 1M tokens, used by cost tracking
@@ -523,7 +519,7 @@ Backends:
 Requires [Go 1.25+](https://go.dev/dl/).
 
 ```bash
-git clone https://github.com/wdw8276/hi.git
+git clone https://github.com/mars-base/hi.git
 cd hi
 make build
 make install

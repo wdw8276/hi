@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/wdw8276/hi/pkg/config"
-	"github.com/wdw8276/hi/pkg/logx"
-	"github.com/wdw8276/hi/pkg/proxy"
+	"github.com/mars-base/hi/pkg/config"
+	"github.com/mars-base/hi/pkg/logx"
+	"github.com/mars-base/hi/pkg/proxy"
 )
 
 const usage = `hi — Claude Code multi-backend proxy

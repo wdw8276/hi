@@ -4,14 +4,14 @@ package proxy
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/wdw8276/hi/pkg/logx"
+	"github.com/mars-base/hi/pkg/logx"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/wdw8276/hi/pkg/config"
+	"github.com/mars-base/hi/pkg/config"
 )
 
 // Backend represents an upstream API backend.

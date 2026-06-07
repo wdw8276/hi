@@ -1,5 +1,5 @@
 # hi — Windows installer (PowerShell)
-# Usage: irm https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/mars-base/hi/main/install-windows.ps1 | iex
 
 param(
     [string]$InstallDir = ""
@@ -7,7 +7,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$Repo = "wdw8276/hi"
+$Repo = "mars-base/hi"
 $Bin = "hi.exe"
 
 # Detect architecture (only amd64 is supported on Windows).

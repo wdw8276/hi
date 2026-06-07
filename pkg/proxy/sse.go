@@ -3,7 +3,7 @@ package proxy
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/wdw8276/hi/pkg/logx"
+	"github.com/mars-base/hi/pkg/logx"
 	"io"
 	"net/http"
 	"strings"

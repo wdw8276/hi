@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/wdw8276/hi/pkg/logx"
+	"github.com/mars-base/hi/pkg/logx"
 	"gopkg.in/yaml.v3"
 )
 

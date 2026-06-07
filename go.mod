@@ -1,4 +1,4 @@
-module github.com/wdw8276/hi
+module github.com/mars-base/hi
 
 go 1.25
 

@@ -1,10 +1,10 @@
 #!/bin/sh
 # hi — one-line installer (Linux & macOS)
-# Usage: curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install.sh | sh
 
 set -e
 
-REPO="wdw8276/hi"
+REPO="mars-base/hi"
 BIN="hi"
 
 # Detect OS and architecture.

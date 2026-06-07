@@ -1,10 +1,10 @@
 @echo off
 REM hi — Windows installer (CMD)
-REM Usage: curl -fsSL https://raw.githubusercontent.com/wdw8276/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
+REM Usage: curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd
 
 setlocal enabledelayedexpansion
 
-set REPO=wdw8276/hi
+set REPO=mars-base/hi
 set BIN=hi.exe
 set ARCH=amd64
 
