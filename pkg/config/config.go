@@ -151,12 +151,15 @@ type Config struct {
 
 // DefaultBackends returns the built-in backend definitions.
 func DefaultBackends() map[string]BackendConfig {
+	stripTrue := true
 	return map[string]BackendConfig{
+
 		"claude": {
-			Type:    "anthropic",
-			BaseURL: "https://api.anthropic.com",
-			APIKey:  "${ANTHROPIC_API_KEY}",
-			Pricing: PricingPerMillion{Input: 3.00, Output: 15.00},
+			Type:          "anthropic",
+			BaseURL:       "https://api.anthropic.com",
+			APIKey:        "${ANTHROPIC_API_KEY}",
+			StripThinking: &stripTrue,
+			Pricing:       PricingPerMillion{Input: 3.00, Output: 15.00},
 			Models: ModelMapping{
 				Opus:   "claude-opus-4-8",
 				Sonnet: "claude-sonnet-4-6",
@@ -164,10 +167,11 @@ func DefaultBackends() map[string]BackendConfig {
 			},
 		},
 		"deepseek": {
-			Type:    "deepseek",
-			BaseURL: "https://api.deepseek.com/anthropic",
-			APIKey:  "${DEEPSEEK_API_KEY}",
-			Pricing: PricingPerMillion{Input: 0.42, Output: 0.83},
+			Type:          "deepseek",
+			BaseURL:       "https://api.deepseek.com/anthropic",
+			APIKey:        "${DEEPSEEK_API_KEY}",
+			StripThinking: &stripTrue,
+			Pricing:       PricingPerMillion{Input: 0.42, Output: 0.83},
 			Models: ModelMapping{
 				Opus:   "deepseek-v4-pro",
 				Sonnet: "deepseek-v4-pro",
