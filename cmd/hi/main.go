@@ -166,10 +166,18 @@ func cmdInitConfig() {
 
 	cfg := config.DefaultConfig()
 	cfg.ActiveBackend = "deepseek"
+
+	// Set explicit strip_thinking defaults so the generated YAML is self-documenting.
+	stripTrue := true
 	bc := cfg.Backends["claude"]
 	bc.BaseURL = baseURL
 	bc.APIKey = apiKeyRef
+	bc.StripThinking = &stripTrue
 	cfg.Backends["claude"] = bc
+
+	ds := cfg.Backends["deepseek"]
+	ds.StripThinking = &stripTrue
+	cfg.Backends["deepseek"] = ds
 
 
 	if err := cfg.Save(); err != nil {
