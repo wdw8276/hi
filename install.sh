@@ -1,6 +1,8 @@
 #!/bin/sh
 # hi — one-line installer (Linux & macOS)
 # Usage: curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install.sh | sh
+#
+# Supports fresh install and upgrade to latest release.
 
 set -e
 
@@ -23,10 +25,30 @@ esac
 # Get latest release tag.
 TAG=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 if [ -z "$TAG" ]; then
-    TAG="v1.0.0"  # fallback
+    echo "Failed to fetch latest release. Check your internet connection."
+    exit 1
 fi
 
 VERSION="${TAG#v}"
+
+# Determine install directory.
+INSTALL_DIR="${PREFIX:-/usr/local/bin}"
+if [ ! -w "$INSTALL_DIR" ]; then
+    INSTALL_DIR="${HOME}/.local/bin"
+fi
+
+# Check current version — skip if up to date.
+if command -v "$BIN" >/dev/null 2>&1; then
+    CURRENT=$("$BIN" --version 2>/dev/null | sed 's/^hi //')
+    if [ "$CURRENT" = "$VERSION" ]; then
+        echo "hi $TAG is already installed and up to date."
+        exit 0
+    fi
+    if [ -n "$CURRENT" ]; then
+        echo "Upgrading hi: $CURRENT -> $VERSION"
+    fi
+fi
+
 ARCHIVE="hi-${VERSION}-${OS}-${ARCH}.tar.gz"
 URL="https://github.com/$REPO/releases/download/$TAG/$ARCHIVE"
 
@@ -35,13 +57,9 @@ curl -fsSL "$URL" -o "$ARCHIVE"
 tar xzf "$ARCHIVE"
 rm -f "$ARCHIVE"
 
-INSTALL_DIR="${PREFIX:-/usr/local/bin}"
-if [ ! -w "$INSTALL_DIR" ]; then
-    echo "Need sudo to install to $INSTALL_DIR"
-    sudo install -m 755 "$BIN" "$INSTALL_DIR/$BIN"
-else
-    install -m 755 "$BIN" "$INSTALL_DIR/$BIN"
-fi
+# Install.
+mkdir -p "$INSTALL_DIR"
+install -m 755 "$BIN" "$INSTALL_DIR/$BIN"
 
 echo ""
 echo "hi $TAG installed to $INSTALL_DIR/$BIN"

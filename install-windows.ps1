@@ -1,5 +1,7 @@
 # hi — Windows installer (PowerShell)
 # Usage: irm https://raw.githubusercontent.com/mars-base/hi/main/install-windows.ps1 | iex
+#
+# Supports fresh install and upgrade to latest release.
 
 param(
     [string]$InstallDir = ""
@@ -9,57 +11,75 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "mars-base/hi"
 $Bin = "hi.exe"
-
-# Detect architecture (only amd64 is supported on Windows).
 $Arch = "amd64"
 
 # Get latest release tag.
 try {
-    $Tag = (Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest").tag_name
+    $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
+    $Tag = $Release.tag_name
 } catch {
-    Write-Warning "Could not fetch latest release, using fallback v1.0.0"
-    $Tag = "v1.0.0"
+    Write-Error "Failed to fetch latest release from GitHub. Check your internet connection."
+    exit 1
 }
 
 $Version = $Tag -replace '^v', ''
-$Archive = "hi-${Version}-windows-${Arch}.zip"
-$Url = "https://github.com/$Repo/releases/download/$Tag/$Archive"
-
-Write-Host "Downloading hi $Tag for windows/$Arch..."
-Invoke-WebRequest -Uri $Url -OutFile $Archive
-
-# Extract.
-Expand-Archive -Path $Archive -DestinationPath . -Force
-Remove-Item $Archive
 
 # Determine install directory.
 if ($InstallDir -eq "") {
-    $LocalBin = "$env:USERPROFILE\.local\bin"
-    if (Test-Path "$env:SystemRoot\System32\where.exe") {
-        # Prefer a directory already in PATH if possible.
-        $InPath = $false
-        try {
-            $null = Get-Command hi.exe -ErrorAction Stop
-            $InPath = $true
-        } catch {}
-        if (-not $InPath) {
-            # Check if LocalAppData is in PATH.
-            $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
-            if ($UserPath -split ";" | Where-Object { $_ -eq $LocalBin }) {
-                $InPath = $true
-            }
-        }
-    }
-    $InstallDir = $LocalBin
+    $InstallDir = "$env:USERPROFILE\.local\bin"
+}
+$Dest = Join-Path $InstallDir $Bin
+
+# Check current version — skip if already up to date.
+$currentVersion = ""
+try {
+    $currentVersion = (& $Dest --version 2>$null) -replace '^hi ', ''
+} catch {}
+if ($currentVersion -eq $Version) {
+    Write-Host "hi $Tag is already installed and up to date."
+    exit 0
 }
 
+if ($currentVersion) {
+    Write-Host "Upgrading hi: $currentVersion -> $Version"
+} else {
+    Write-Host "Installing hi $Tag for windows/$Arch..."
+}
+
+# Download to temp name to avoid file-lock issues.
+$Archive = "hi-${Version}-windows-${Arch}.zip"
+$Url = "https://github.com/$Repo/releases/download/$Tag/$Archive"
+$TmpBin = Join-Path $InstallDir "hi_new.exe"
+
+Invoke-WebRequest -Uri $Url -OutFile $Archive
+Expand-Archive -Path $Archive -DestinationPath . -Force
+Remove-Item $Archive
+
+# Ensure install directory exists.
 if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 }
 
-# Move binary.
-$Dest = Join-Path $InstallDir $Bin
-Move-Item -Force $Bin $Dest
+# Stop running hi processes so we can replace the binary.
+$running = Get-Process hi -ErrorAction SilentlyContinue
+if ($running) {
+    Write-Host "Stopping running hi processes..."
+    $running | Stop-Process -Force
+    Start-Sleep -Seconds 2
+}
+
+# Replace binary.
+Move-Item -Force $Bin $TmpBin
+try {
+    Remove-Item $Dest -Force -ErrorAction SilentlyContinue
+    Move-Item -Force $TmpBin $Dest
+} catch {
+    Write-Warning "Could not replace $Dest — file may be in use."
+    Write-Warning "Close all Claude Code / hi sessions and run this script again."
+    Remove-Item $TmpBin -Force -ErrorAction SilentlyContinue
+    Remove-Item $Bin -Force -ErrorAction SilentlyContinue
+    exit 1
+}
 
 Write-Host ""
 Write-Host "hi $Tag installed to $Dest"
