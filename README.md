@@ -74,6 +74,9 @@ hi launch --backend deepseek
 # Proxy only (no Claude Code, no settings.json patch)
 hi proxy --log-file /tmp/hi.log
 
+# Proxy in background (Linux / macOS)
+nohup hi proxy > /dev/null 2>&1 &
+
 # Show config and status
 hi status
 ```

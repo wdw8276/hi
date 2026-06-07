@@ -65,6 +65,9 @@ hi launch --backend deepseek
 # 仅启动代理（不启动 Claude Code，不修改 settings.json）
 hi proxy --log-file /tmp/hi.log
 
+# 代理后台运行（Linux / macOS）
+nohup hi proxy > /dev/null 2>&1 &
+
 # 查看配置和状态
 hi status
 ```
