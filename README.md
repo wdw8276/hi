@@ -16,7 +16,7 @@ session — **hi**. The agent replies "Hello, how can I help you?" and the work
 begins. Simple, memorable, and fitting for the AI era. May evolve if a better
 name comes along.
 
-### Quick start
+## Quick start
 
 ### Prerequisites
 
@@ -56,15 +56,14 @@ user PATH. Restart your terminal after installation.
 ### Run
 
 ```bash
-# 1. Initialize your configuration (auto-detects settings.json)
+# 1. Initialize configuration (auto-detects settings.json)
 hi init-config
 
-# 2. Edit your config (Linux/macOS: ~/.hi/config.yaml, Windows: %USERPROFILE%/.hi/config.yaml)
-#    (skip if the auto-detected defaults are fine)
+# 2. Edit config (Linux/macOS: ~/.hi/config.yaml, Windows: %USERPROFILE%/.hi/config.yaml)
+#    Skip if the auto-detected defaults are fine.
 
-# 3. Launch — proxy + Claude Code
+# 3. Launch proxy + Claude Code
 hi
-  #    Inside Claude Code, hot-switch with /deepseek or /claude
 
 # Attach additional agents to an already-running proxy
 hi cc

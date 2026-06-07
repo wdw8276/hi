@@ -51,11 +51,10 @@ curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.c
 hi init-config
 
 # 2. 编辑配置文件（Linux/macOS: ~/.hi/config.yaml, Windows: %USERPROFILE%/.hi/config.yaml）
-#    （自动检测的默认值够用的话可以跳过）
+#    自动检测的默认值够用的话可以跳过
 
-# 3. 启动 — 代理 + Claude Code
+# 3. 启动代理 + Claude Code（输入 /deepseek 或 /claude 即时切换后端）
 hi
-  #    在 Claude Code 中输入 /deepseek 或 /claude 即时切换后端
 
 # 将额外的 agent 附加到已运行的代理
 hi cc
