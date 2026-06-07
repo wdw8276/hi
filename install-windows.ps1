@@ -9,6 +9,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Ensure TLS 1.2 for older Windows / PowerShell versions.
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 $Repo = "mars-base/hi"
 $Bin = "hi.exe"
 $Arch = "amd64"
