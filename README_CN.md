@@ -56,6 +56,12 @@ hi init-config
 # 3. 启动代理 + Claude Code（输入 /deepseek 或 /claude 即时切换后端）
 hi
 
+# 或不写配置文件，通过环境变量传入 API key
+ANTHROPIC_API_KEY=sk-xxx DEEPSEEK_API_KEY=sk-xxx hi
+
+# Windows 环境变量方式
+$env:ANTHROPIC_API_KEY="sk-xxx"; $env:DEEPSEEK_API_KEY="sk-xxx"; hi
+
 # 将额外的 agent 附加到已运行的代理
 hi cc
 

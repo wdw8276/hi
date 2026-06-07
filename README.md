@@ -65,6 +65,12 @@ hi init-config
 # 3. Launch proxy + Claude Code
 hi
 
+# Or with inline API keys (no config file needed)
+ANTHROPIC_API_KEY=sk-xxx DEEPSEEK_API_KEY=sk-xxx hi
+
+# Windows: set env vars then launch
+$env:ANTHROPIC_API_KEY="sk-xxx"; $env:DEEPSEEK_API_KEY="sk-xxx"; hi
+
 # Attach additional agents to an already-running proxy
 hi cc
 
@@ -73,9 +79,6 @@ hi launch --backend deepseek
 
 # Proxy only (no Claude Code, no settings.json patch)
 hi proxy --log-file /tmp/hi.log
-
-# Proxy in background (Linux / macOS)
-nohup hi proxy > /dev/null 2>&1 &
 
 # Show config and status
 hi status
