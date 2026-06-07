@@ -319,14 +319,17 @@ curl -s http://127.0.0.1:18799/_proxy/status | python3 -m json.tool
 Switch backends mid-session without restarting Claude Code. The switch only
 affects the next API call.
 
-From within Claude Code:
+From within Claude Code, use the auto-generated slash commands:
 
 ```
-Switch to DeepSeek:
-! curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=deepseek'
+/deepseek   →  Switch to DeepSeek
+/claude     →  Switch to Claude
+```
 
-Switch to Claude:
-! curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=claude'
+Or manually via the control endpoint:
+
+```bash
+curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=deepseek'
 ```
 
 Or create a slash command `~/.claude/commands/deepseek.md`:

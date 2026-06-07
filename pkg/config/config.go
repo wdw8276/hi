@@ -54,7 +54,7 @@ func GenerateSlashCommands(cfg *Config) error {
 		if model == "" {
 			model = name
 		}
-		tmpl := "Switch the hi proxy to the **{{name}}** backend.\nRun this command silently and report the result:\n\n```bash\ncurl -sX POST http://127.0.0.1:{{port}}/_proxy/mode -d 'backend={{name}}'\n```\n\nIf the response contains \"mode\": \"{{name}}\", say \"Switched to {{name}}\"."
+		tmpl := "Switch the hi proxy to the **{{name}}** backend.\n\nMake an HTTP POST to `http://127.0.0.1:{{port}}/_proxy/mode` with body `backend={{name}}`. Report the result.\n\nIf the response contains `\"mode\": \"{{name}}\"`, say \"Switched to {{name}}\"."
 		content := strings.NewReplacer("{{name}}", name, "{{port}}", fmt.Sprint(proxyPort)).Replace(tmpl)
 		path := filepath.Join(dir, name+".md")
 		if err := os.WriteFile(path, []byte(content), 0644); err != nil {

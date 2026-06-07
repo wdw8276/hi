@@ -298,14 +298,17 @@ curl -s http://127.0.0.1:18799/_proxy/status | python3 -m json.tool
 
 在会话中切换后端，无需重启 Claude Code。切换仅影响下一次 API 调用。
 
-在 Claude Code 中输入：
+在 Claude Code 中使用自动生成的斜杠命令：
 
 ```
-切换到 DeepSeek：
-! curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=deepseek'
+/deepseek   →  切换到 DeepSeek
+/claude     →  切换到 Claude
+```
 
-切换到 Claude：
-! curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=claude'
+或手动通过控制端点切换：
+
+```bash
+curl -sX POST http://127.0.0.1:18799/_proxy/mode -d 'backend=deepseek'
 ```
 
 或创建 slash 命令 `~/.claude/commands/deepseek.md`：
