@@ -150,6 +150,7 @@ func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Respo
 	// Record usage if we got any tokens.
 	if inputTokens > 0 || outputTokens > 0 {
 		ps.costTracker.Record(backendName, inputTokens, outputTokens)
+		logx.Info("#%d tokens: in=%d out=%d", ps.RequestCount(), inputTokens, outputTokens)
 	}
 }
 
@@ -267,6 +268,7 @@ func (ps *ProxyState) processJSONResponse(w http.ResponseWriter, resp *http.Resp
 			if ot, ok := usage["output_tokens"].(float64); ok {
 				outputTokens = int64(ot)
 				ps.costTracker.Record(backendName, inputTokens, outputTokens)
+				logx.Info("#%d tokens: in=%d out=%d", ps.RequestCount(), inputTokens, outputTokens)
 			}
 		}
 
