@@ -70,6 +70,8 @@ func NewProxyState(cfg *config.Config) (*ProxyState, error) {
 		costTracker: NewCostTracker(cfg.GetPricing()),
 		startTime:   time.Now(),
 	}
+	// Seed request counter from persisted cost data so it survives restarts.
+	ps.reqCount.Store(uint64(ps.costTracker.TotalRequests()))
 
 	return ps, nil
 }

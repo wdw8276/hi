@@ -207,3 +207,14 @@ func roundTo(v float64, decimals int) float64 {
 	}
 	return float64(int(v*pow+0.5)) / pow
 }
+
+// TotalRequests returns the cumulative request count across all backends.
+func (ct *CostTracker) TotalRequests() int64 {
+	ct.mu.RLock()
+	defer ct.mu.RUnlock()
+	var total int64
+	for _, bt := range ct.usage {
+		total += bt.Requests
+	}
+	return total
+}
