@@ -234,6 +234,9 @@ func cmdStatusline() {
 			if bc, ok := cfg.Backends[activeBackend]; ok {
 				if cw, ok := obj["context_window"].(map[string]interface{}); ok {
 					cw["context_window_size"] = float64(bc.ContextWindowOr())
+					// Remove raw token counts so the script falls back to
+					// used_percentage × context_window_size.
+					delete(cw, "current_usage")
 				}
 			}
 			if patched, err := json.Marshal(obj); err == nil {
