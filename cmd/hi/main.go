@@ -286,14 +286,10 @@ func cmdProxy() {
 		logx.Warn("failed to generate slash commands: %v", err)
 	}
 
-	fmt.Printf("hi: Proxy starting at http://127.0.0.1:%d (backend: %s)\n", cfg.ProxyPort, cfg.ActiveBackend)
-	fmt.Printf("hi: Status:  curl -s http://127.0.0.1:%d/_proxy/status\n", cfg.ProxyPort)
-	fmt.Printf("hi: Switch:  curl -sX POST http://127.0.0.1:%d/_proxy/mode -d 'backend=<name>'\n", cfg.ProxyPort)
-	fmt.Println()
-
 	defer logx.Close()
 	if err := proxy.StartServer(cfg); err != nil {
-		logx.Fatalf("Failed to start proxy: %v", err)
+		fmt.Fprintf(os.Stderr, "hi: %v\n", err)
+		os.Exit(1)
 	}
 }
 

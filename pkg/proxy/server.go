@@ -257,6 +257,13 @@ func StartServer(cfg *config.Config) error {
 	defer state.Close()
 
 	addr := fmt.Sprintf("127.0.0.1:%d", cfg.ProxyPort)
+
+	// Pre-acquire listener to detect port conflicts before printing startup banner.
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", addr)
+	if err != nil {
+		return fmt.Errorf("port %s already in use — another hi proxy is running. Use 'hi cc' or 'hi agent' to attach instead", addr)
+	}
+
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      state,
@@ -268,6 +275,11 @@ func StartServer(cfg *config.Config) error {
 	logx.Info("Proxy listening on %s (active: %s)", addr, state.ActiveName())
 	logx.Info("Control: curl -s http://%s/_proxy/status", addr)
 	logx.Info("Switch:  curl -sX POST http://%s/_proxy/mode -d 'backend=deepseek'", addr)
+
+	fmt.Printf("hi: Proxy started at http://%s (backend: %s)\n", addr, state.ActiveName())
+	fmt.Printf("hi: Status:  curl -s http://%s/_proxy/status\n", addr)
+	fmt.Printf("hi: Switch:  curl -sX POST http://%s/_proxy/mode -d 'backend=<name>'\n", addr)
+	fmt.Println()
 
 	// Graceful shutdown on SIGINT / SIGTERM.
 	idleConns := make(chan struct{})
@@ -281,7 +293,7 @@ func StartServer(cfg *config.Config) error {
 		close(idleConns)
 	}()
 
-	err = srv.ListenAndServe()
+	err = srv.Serve(ln)
 	if err != nil && err != http.ErrServerClosed {
 		if strings.Contains(err.Error(), "address already in use") {
 			port := cfg.ProxyPort
