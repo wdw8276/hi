@@ -201,11 +201,6 @@ func mustHomeDir() string {
 func cmdStatusline() {
 	stdinData, _ := io.ReadAll(os.Stdin)
 
-	modelMap := map[string]string{
-		"deepseek": "deepseek-v4-pro",
-		"claude":   "claude-sonnet-4-6",
-	}
-
 	// Query hi proxy for current backend model.
 	cfg, _ := config.Load()
 	proxyPort := cfg.ProxyPort
@@ -218,8 +213,9 @@ func cmdStatusline() {
 			ActiveBackend string `json:"active_backend"`
 		}
 		if json.Unmarshal(body, &status) == nil {
-			if m, ok := modelMap[status.ActiveBackend]; ok {
-				model = m
+			// Read model name from config for the active backend.
+			if bc, ok := cfg.Backends[status.ActiveBackend]; ok && bc.Models.Sonnet != "" {
+				model = bc.Models.Sonnet
 			}
 		}
 	}
