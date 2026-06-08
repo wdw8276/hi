@@ -61,7 +61,14 @@ if ($Tag) {
                     [Environment]::SetEnvironmentVariable("Path", "$UserPath;$InstallDir", "User")
                     $env:Path = "$env:Path;$InstallDir"
                 }
-                Write-Host "Run: hi launch"
+                Write-Host ""
+                Write-Host "Quick start:"
+                Write-Host "  1. hi init-config      (auto-detects settings)"
+                Write-Host "  2. Edit ~/.hi/config.yaml if needed"
+                Write-Host "  3. hi                   (proxy + Claude Code)"
+                Write-Host "  Or: hi proxy & hi cc    (standalone proxy + attach)"
+                Write-Host ""
+                Write-Host "Run: hi"
             }
         } catch {
             Write-Host ""

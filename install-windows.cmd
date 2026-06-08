@@ -12,10 +12,15 @@ set ARCH=amd64
 set INSTALL_DIR=%USERPROFILE%\.local\bin
 set DEST=%INSTALL_DIR%\%BIN%
 
-REM Get latest release tag.
-for /f "tokens=*" %%i in ('curl -sL "https://api.github.com/repos/%REPO%/releases/latest" 2^>nul ^| findstr /r "tag_name"') do set TAG_LINE=%%i
+REM Get latest release tag. Write to temp file first — pipes in for /f
+REM are unreliable on some Windows versions.
+set RELEASE_JSON=%TEMP%\_hi_release.json
+curl -sL "https://api.github.com/repos/%REPO%/releases/latest" > "%RELEASE_JSON%"
+for /f "tokens=*" %%i in ('findstr "tag_name" "%RELEASE_JSON%"') do set TAG_LINE=%%i
+del "%RELEASE_JSON%" >nul 2>&1
 if "%TAG_LINE%"=="" (
-    echo Failed to fetch latest release. Check your internet connection.
+    echo Failed to fetch latest release from GitHub.
+    echo If you are behind a proxy, set HTTP_PROXY and HTTPS_PROXY first.
     exit /b 1
 )
 
@@ -92,6 +97,12 @@ if errorlevel 1 (
 )
 
 echo.
-echo Run: hi launch
+echo Quick start:
+echo   1. hi init-config    ^(auto-detects settings^)
+echo   2. Edit ~/.hi/config.yaml if needed
+echo   3. hi                 ^(proxy + Claude Code^)
+echo   Or: hi proxy ^& hi cc ^(standalone proxy + attach^)
+echo.
+echo Run: hi
 
 endlocal
