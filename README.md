@@ -277,63 +277,6 @@ Key points:
 > block. If your API gateway rejects the ``[1m]`` suffix, just use the
 > plain names (``deepseek-v4-pro``, ``deepseek-v4-flash``) instead.
 
-## How it works
-
-hi runs a local proxy between Claude Code and your API endpoint, intercepting all requests and routing them to the configured backend:
-
-```
-Claude Code CLI (tools, file editing, bash — unchanged)
-  └── All API calls → hi proxy (localhost:18799)
-                        ├── Inject backend auth
-                        ├── Auto-remap model names
-                        └── Route → any Anthropic-compatible backend (Claude, DeepSeek, OpenRouter, custom…)
-```
-
-On startup, hi temporarily patches `~/.claude/settings.json` to point
-Claude Code at the local proxy. The file is restored on exit — completely
-transparent.
-
-Define as many backends as you need in `~/.hi/config.yaml` — each one
-becomes a hot‑switch target via `/_proxy/mode` or a slash command.
-
-Environment variable priority (Claude Code startup):
-
-```
-settings.json env block > OS process environment
-```
-
-**Crash recovery:** If hi is killed abruptly (`kill -9`, power loss), the
-patched `settings.json` is left behind. On the next launch, hi detects
-the stale backup at `~/.claude/settings.json.hi-backup` and restores
-the original file automatically. No manual repair needed.
-
-**Port conflicts:** Only one hi proxy can run at a time on port `18799`.
-If a second instance is started, it prints a clear error and exits:
-
-```
-hi: Proxy startup failed: port :18799 already in use —
-another hi proxy is running. Use 'hi cc' or 'hi agent' to attach instead
-```
-
-Use `hi cc` to attach an additional Claude Code session to the existing proxy.
-
-### Standalone proxy mode
-
-Running `hi proxy` starts only the proxy server — no Claude Code. Use
-this for testing backend connectivity or serving multiple agents:
-
-```bash
-# Terminal 1: start proxy
-hi proxy
-
-# Terminal 2: attach agents
-hi cc
-hi cc --backend claude
-
-# Or test with curl directly
-curl -s http://127.0.0.1:18799/_proxy/status | python3 -m json.tool
-```
-
 ## Hot-switching backends
 
 Switch backends mid-session without restarting Claude Code. The switch only

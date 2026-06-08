@@ -259,55 +259,6 @@ backends:
 > 拒绝了 ``[1m]`` 后缀，换用不带后缀的名称（``deepseek-v4-pro``、
 > ``deepseek-v4-flash``）即可。
 
-## 工作原理
-
-hi 在 Claude Code 和 API 端点之间运行一个本地代理，拦截所有请求并路由到配置的后端：
-
-```
-Claude Code CLI（工具、文件编辑、bash — 完全不变）
-  └── 所有 API 调用 → hi 代理 (localhost:18799)
-                        ├── 注入后端认证
-                        ├── 自动重映射模型名
-                        └── 路由 → 任意 Anthropic 兼容后端（Claude、DeepSeek、OpenRouter、自定义……）
-```
-
-启动时，hi 临时 patch `~/.claude/settings.json` 将 Claude Code 指向本地代理。文件在退出时恢复——完全透明。
-
-在 `~/.hi/config.yaml` 中定义任意数量的后端——每个后端都可通过 `/_proxy/mode` 或 slash 命令热切换。
-
-环境变量优先级（Claude Code 启动时）：
-
-```
-settings.json env block > OS process environment
-```
-
-**崩溃恢复**：如果 hi 被强制终止（`kill -9`、断电），被 patch 的 `settings.json` 会残留。下次启动时，hi 检测到 `~/.claude/settings.json.hi-backup` 中的过期备份，自动恢复原始文件。无需手动修复。
-
-**端口冲突**：同一时间只能有一个 hi 代理在端口 `18799` 上运行。如果启动第二个实例，它会打印清晰的错误并退出：
-
-```
-hi: Proxy startup failed: port :18799 already in use —
-another hi proxy is running. Use 'hi cc' or 'hi agent' to attach instead
-```
-
-使用 `hi cc` 将额外的 Claude Code 会话附加到已有的代理。
-
-### 独立代理模式
-
-运行 `hi proxy` 仅启动代理服务器——不启动 Claude Code。适用于测试后端连通性或为多个 agent 提供服务：
-
-```bash
-# 终端 1：启动代理
-hi proxy
-
-# 终端 2：附加 agent
-hi cc
-hi cc --backend claude
-
-# 或直接用 curl 测试
-curl -s http://127.0.0.1:18799/_proxy/status | python3 -m json.tool
-```
-
 ## 热切换后端
 
 在会话中切换后端，无需重启 Claude Code。切换仅影响下一次 API 调用。
