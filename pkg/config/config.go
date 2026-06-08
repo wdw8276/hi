@@ -173,9 +173,9 @@ func DefaultBackends() map[string]BackendConfig {
 			StripThinking: &stripTrue,
 			Pricing:       PricingPerMillion{Input: 0.42, Output: 0.83},
 			Models: ModelMapping{
-				Opus:   "deepseek-v4-pro",
-				Sonnet: "deepseek-v4-pro",
-				Haiku:  "deepseek-v4-flash",
+				Opus:   "deepseek-v4-pro[1m]",
+				Sonnet: "deepseek-v4-pro[1m]",
+				Haiku:  "deepseek-v4-flash[1m]",
 			},
 		},
 	}
