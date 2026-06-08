@@ -137,6 +137,20 @@ tail -f /tmp/hi-$(date +%F).log | grep -E "#[0-9]|Control:|backend |env:"
 | macOS | `/Users/user/.hi/` |
 | Windows | `C:\Users\user\.hi\` |
 
+## 支持的大模型
+
+hi 兼容任意 Anthropic 兼容 API。以下是官方支持的提供商及其端点：
+
+| 提供商 | 类型 | Base URL | 官方文档 |
+|--------|------|----------|----------|
+| Anthropic（Claude） | `anthropic` | `https://api.anthropic.com` | — |
+| DeepSeek | `deepseek` | `https://api.deepseek.com/anthropic` | — |
+| MiniMax | `anthropic` | `https://api.minimax.io/anthropic` | [文档](https://platform.minimax.io/docs/token-plan/claude-code) |
+| GLM（z.ai） | `anthropic` | `https://api.z.ai/api/anthropic` | [文档](https://docs.z.ai/devpack/tool/claude) |
+| Kimi | `anthropic` | `https://api.kimi.com/coding/` | [文档](https://www.kimi.com/code/docs/en/) |
+
+> 任何支持 Anthropic API 协议的网关或代理（如雷火、OpenRouter、OneAPI、内部网关）也能直接使用——只需设置 `type: anthropic` 和对应的 `base_url`。
+
 ## 配置
 
 首次运行 `hi status` 会自动生成 `~/.hi/config.yaml`：

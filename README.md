@@ -153,6 +153,23 @@ automatically:
 | macOS | `/Users/user/.hi/` |
 | Windows | `C:\Users\user\.hi\` |
 
+## Supported Models
+
+hi works with any Anthropic‑compatible API. Here are the officially supported
+providers and their endpoints:
+
+| Provider | Type | Base URL | Official Guide |
+|----------|------|----------|----------------|
+| Anthropic (Claude) | `anthropic` | `https://api.anthropic.com` | — |
+| DeepSeek | `deepseek` | `https://api.deepseek.com/anthropic` | — |
+| MiniMax | `anthropic` | `https://api.minimax.io/anthropic` | [Docs](https://platform.minimax.io/docs/token-plan/claude-code) |
+| GLM (z.ai) | `anthropic` | `https://api.z.ai/api/anthropic` | [Docs](https://docs.z.ai/devpack/tool/claude) |
+| Kimi | `anthropic` | `https://api.kimi.com/coding/` | [Docs](https://www.kimi.com/code/docs/en/) |
+
+> Any gateway or proxy that speaks the Anthropic API protocol (e.g. Leihuo,
+> OpenRouter, OneAPI, internal gateways) also works — just set `type: anthropic`
+> and the appropriate `base_url`.
+
 ## Configuration
 
 First run of `hi status` auto-generates `~/.hi/config.yaml`:
