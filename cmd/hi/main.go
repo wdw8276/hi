@@ -205,6 +205,7 @@ func cmdStatusline() {
 	cfg, _ := config.Load()
 	proxyPort := cfg.ProxyPort
 	model := ""
+	activeBackend := ""
 	resp, err := httpGetImpl(fmt.Sprintf("http://127.0.0.1:%d/_proxy/status", proxyPort))
 	if err == nil {
 		defer resp.Body.Close()
@@ -213,6 +214,7 @@ func cmdStatusline() {
 			ActiveBackend string `json:"active_backend"`
 		}
 		if json.Unmarshal(body, &status) == nil {
+			activeBackend = status.ActiveBackend
 			// Read model name from config for the active backend.
 			if bc, ok := cfg.Backends[status.ActiveBackend]; ok && bc.Models.Sonnet != "" {
 				model = bc.Models.Sonnet
@@ -220,13 +222,19 @@ func cmdStatusline() {
 		}
 	}
 
-	// Patch model in stdin JSON.
+	// Patch model and context_window in stdin JSON.
 	if model != "" && len(stdinData) > 0 {
 		var obj map[string]interface{}
 		if json.Unmarshal(stdinData, &obj) == nil {
 			if mod, ok := obj["model"].(map[string]interface{}); ok {
 				mod["display_name"] = model
 				mod["id"] = model
+			}
+			// Patch context window from backend config.
+			if bc, ok := cfg.Backends[activeBackend]; ok {
+				if cw, ok := obj["context_window"].(map[string]interface{}); ok {
+					cw["context_window_size"] = float64(bc.ContextWindowOr())
+				}
 			}
 			if patched, err := json.Marshal(obj); err == nil {
 				stdinData = patched

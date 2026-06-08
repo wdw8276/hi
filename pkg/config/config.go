@@ -131,6 +131,9 @@ type BackendConfig struct {
 	// state, and Claude Code's tool-use requests may break this invariant.
 	// Default based on backend type: true for "deepseek", false for "anthropic".
 	StripThinking *bool `yaml:"strip_thinking,omitempty"`
+	// ContextWindow is the max context window size for this backend.
+	// Used by statusline. Default: 1M for deepseek, 200k for anthropic.
+	ContextWindow *int64 `yaml:"context_window,omitempty"`
 }
 
 // ShouldStripThinking returns whether the top-level "thinking" config should be
@@ -140,6 +143,17 @@ func (b BackendConfig) ShouldStripThinking() bool {
 		return *b.StripThinking
 	}
 	return b.Type == "deepseek"
+}
+
+// ContextWindowOr returns the context window size. If unset, uses defaults.
+func (b BackendConfig) ContextWindowOr() int64 {
+	if b.ContextWindow != nil {
+		return *b.ContextWindow
+	}
+	if b.Type == "deepseek" {
+		return 1_000_000 // 1M
+	}
+	return 200_000 // 200k for anthropic and others
 }
 
 // Config is the root configuration structure.
