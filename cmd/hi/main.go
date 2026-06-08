@@ -179,7 +179,6 @@ func cmdInitConfig() {
 	ds.StripThinking = &stripTrue
 	cfg.Backends["deepseek"] = ds
 
-
 	if err := cfg.Save(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to write config: %v\n", err)
 		os.Exit(1)
@@ -360,7 +359,7 @@ func cmdLaunch() {
 	// Temporarily patch ~/.claude/settings.json so Claude Code reads
 	// hi's env vars instead of the persisted ones. ANTHROPIC_API_KEY
 	// is intentionally left untouched — Claude Code needs it locally.
-restoreCC, _ := config.CCOverride(map[string]string{
+	restoreCC, _ := config.CCOverride(map[string]string{
 		"ANTHROPIC_BASE_URL":             proxyURL,
 		"ANTHROPIC_AUTH_TOKEN":           apiKey,
 		"ANTHROPIC_MODEL":                cfg.Backends[backend].Models.Sonnet,
@@ -436,7 +435,7 @@ func cmdAgent() {
 
 	// Patch settings.json temporarily so Claude Code reads the proxy address.
 	// Settings.json env has higher priority than process env vars.
-restoreCC, _ := config.CCOverride(map[string]string{
+	restoreCC, _ := config.CCOverride(map[string]string{
 		"ANTHROPIC_BASE_URL":             proxyURL,
 		"ANTHROPIC_AUTH_TOKEN":           apiKey,
 		"ANTHROPIC_MODEL":                bc.Models.Sonnet,

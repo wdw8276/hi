@@ -59,11 +59,11 @@ func NewBackend(name string, cfg config.BackendConfig) (Backend, error) {
 // ==============================
 
 type anthropicBackend struct {
-	name            string
-	target          *url.URL
-	apiKey          string
-	modelMap        map[string]string
-	stripTopThink   bool
+	name          string
+	target        *url.URL
+	apiKey        string
+	modelMap      map[string]string
+	stripTopThink bool
 }
 
 func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBackend, error) {
@@ -104,7 +104,7 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 	}, nil
 }
 
-func (b *anthropicBackend) Name() string             { return b.name }
+func (b *anthropicBackend) Name() string                { return b.name }
 func (b *anthropicBackend) NeedsThinkingStrip() bool    { return false }
 func (b *anthropicBackend) StripTopLevelThinking() bool { return b.stripTopThink }
 
@@ -176,7 +176,7 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 	}, nil
 }
 
-func (b *deepseekBackend) Name() string             { return b.name }
+func (b *deepseekBackend) Name() string                { return b.name }
 func (b *deepseekBackend) NeedsThinkingStrip() bool    { return false }
 func (b *deepseekBackend) StripTopLevelThinking() bool { return b.stripTopThink }
 

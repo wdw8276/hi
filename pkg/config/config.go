@@ -400,58 +400,58 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 	if overrideStatusline {
 		if sl, ok := doc["statusLine"].(map[string]interface{}); ok {
 			if cmd, ok := sl["command"].(string); ok && cmd != "" {
-			setOriginalStatusCommand(cmd)
+				setOriginalStatusCommand(cmd)
 
-			// Find or install a stable hi binary.
-			home, _ := os.UserHomeDir()
-			curExe, _ := os.Executable()
-			var candidates []string
-			if runtime.GOOS == "windows" {
-				appData := os.Getenv("LOCALAPPDATA")
-				if appData == "" && home != "" {
-					appData = filepath.Join(home, "AppData", "Local")
-				}
-				if appData != "" {
-					candidates = append(candidates, filepath.Join(appData, "hi", "hi.exe"))
-				}
-				candidates = append(candidates, filepath.Join(home, "hi", "hi.exe"))
-			} else {
-				candidates = []string{"/usr/local/bin/hi"}
-				if home != "" {
-					candidates = append(candidates, filepath.Join(home, ".local", "bin", "hi"))
-				}
-			}
-			candidates = append(candidates, curExe)
-
-			targetExe := curExe
-			for _, dest := range candidates[:len(candidates)-1] {
-				if _, err := os.Stat(dest); err == nil {
-					targetExe = dest
-					break
-				}
-				if data, err := os.ReadFile(curExe); err == nil {
-					dir := filepath.Dir(dest)
-					os.MkdirAll(dir, 0755)
-					perm := os.FileMode(0755)
-					if runtime.GOOS == "windows" {
-						perm = 0644
+				// Find or install a stable hi binary.
+				home, _ := os.UserHomeDir()
+				curExe, _ := os.Executable()
+				var candidates []string
+				if runtime.GOOS == "windows" {
+					appData := os.Getenv("LOCALAPPDATA")
+					if appData == "" && home != "" {
+						appData = filepath.Join(home, "AppData", "Local")
 					}
-					writeErr := os.WriteFile(dest, data, perm)
-					if writeErr == nil {
-						logx.Info("installed hi to %s", dest)
+					if appData != "" {
+						candidates = append(candidates, filepath.Join(appData, "hi", "hi.exe"))
+					}
+					candidates = append(candidates, filepath.Join(home, "hi", "hi.exe"))
+				} else {
+					candidates = []string{"/usr/local/bin/hi"}
+					if home != "" {
+						candidates = append(candidates, filepath.Join(home, ".local", "bin", "hi"))
+					}
+				}
+				candidates = append(candidates, curExe)
+
+				targetExe := curExe
+				for _, dest := range candidates[:len(candidates)-1] {
+					if _, err := os.Stat(dest); err == nil {
 						targetExe = dest
 						break
 					}
-					logx.Debug("auto-install to %s failed: %v", dest, writeErr)
+					if data, err := os.ReadFile(curExe); err == nil {
+						dir := filepath.Dir(dest)
+						os.MkdirAll(dir, 0755)
+						perm := os.FileMode(0755)
+						if runtime.GOOS == "windows" {
+							perm = 0644
+						}
+						writeErr := os.WriteFile(dest, data, perm)
+						if writeErr == nil {
+							logx.Info("installed hi to %s", dest)
+							targetExe = dest
+							break
+						}
+						logx.Debug("auto-install to %s failed: %v", dest, writeErr)
+					}
 				}
-			}
 
-			doc["statusLine"] = map[string]interface{}{
-				"type":            "command",
-				"command":         targetExe + " statusline",
-				"refreshInterval": 120,
-			}
-			logx.Info("statusline: %s → hi statusline (model live update)", cmd)
+				doc["statusLine"] = map[string]interface{}{
+					"type":            "command",
+					"command":         targetExe + " statusline",
+					"refreshInterval": 120,
+				}
+				logx.Info("statusline: %s → hi statusline (model live update)", cmd)
 			}
 		}
 	}
