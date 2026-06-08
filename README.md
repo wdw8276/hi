@@ -269,6 +269,7 @@ Key points:
 - `api_key` — supports `${ENV_VAR}` expansion or literal keys
 - `models.opus/sonnet/haiku` — maps Claude model names to backend‑specific IDs
 - `pricing` — USD per 1M tokens, used by cost tracking
+- `context_window` — max context window size in tokens for statusline display. Default: ``1000000`` for `deepseek`, ``200000`` for other types
 
 > **DeepSeek 1M context window**: for the official DeepSeek API, append
 > ``[1m]`` to the model name to unlock the 1M‑token context window. Write

@@ -251,6 +251,7 @@ backends:
 - `api_key` — 支持 `${ENV_VAR}` 展开或直接填写 key
 - `models.opus/sonnet/haiku` — 将 Claude 模型名映射到后端实际模型 ID
 - `pricing` — 每百万 token 的 USD 价格，用于成本追踪
+- `context_window` — 最大上下文窗口（tokens），用于状态栏显示。默认：`deepseek` 为 ``1000000``（1M），其他类型为 ``200000``
 
 > **DeepSeek 1M 上下文窗口**：使用 DeepSeek 官方 API 时，在模型名称后追加
 > ``[1m]`` 即可解锁 1M token 上下文窗口。在 `models` 块中写入
