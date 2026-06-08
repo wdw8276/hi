@@ -165,9 +165,9 @@ backends:
       input: 0.42
       output: 0.83
     models:
-      opus: deepseek-v4-pro
-      sonnet: deepseek-v4-pro
-      haiku: deepseek-v4-flash
+      opus: deepseek-v4-pro[1m]
+      sonnet: deepseek-v4-pro[1m]
+      haiku: deepseek-v4-flash[1m]
 ```
 
 The `type: anthropic` backend works with any Anthropic‑compatible API —
@@ -228,9 +228,9 @@ backends:
     api_key: "${DEEPSEEK_API_KEY}"
     pricing: { input: 0.42, output: 0.83 }
     models:
-      opus: deepseek-v4-pro
-      sonnet: deepseek-v4-pro
-      haiku: deepseek-v4-flash
+      opus: deepseek-v4-pro[1m]
+      sonnet: deepseek-v4-pro[1m]
+      haiku: deepseek-v4-flash[1m]
 
   # Example: custom backend via an internal gateway
   internal:
@@ -509,6 +509,7 @@ cat ~/.hi/.cost.json | python3 -m json.tool
 
 ```
 [hi] INFO  15:07:03 #2 POST deepseek /v1/messages 200 634ms
+[hi] INFO  15:07:03 #2 tokens: in=114 out=120
 [hi] DEBUG 15:07:03   -> upstream: POST https://api.anthropic.com/v1/messages
 [hi] DEBUG 15:07:03   <- status=200 content-type=application/json
 [hi] DEBUG 15:07:03 Model remap: claude-sonnet-4-6 → deepseek-v4-pro

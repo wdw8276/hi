@@ -154,9 +154,9 @@ backends:
       input: 0.42
       output: 0.83
     models:
-      opus: deepseek-v4-pro
-      sonnet: deepseek-v4-pro
-      haiku: deepseek-v4-flash
+      opus: deepseek-v4-pro[1m]
+      sonnet: deepseek-v4-pro[1m]
+      haiku: deepseek-v4-flash[1m]
 ```
 
 `type: anthropic` 后端兼容任意 Anthropic 兼容 API——OpenRouter、OneAPI、内部网关、Azure 等。只需修改 `base_url` 和 `api_key`。详见[添加自定义后端](#添加自定义后端)。
@@ -214,9 +214,9 @@ backends:
     strip_thinking: true
     pricing: { input: 0.42, output: 0.83 }
     models:
-      opus: deepseek-v4-pro
-      sonnet: deepseek-v4-pro
-      haiku: deepseek-v4-flash
+      opus: deepseek-v4-pro[1m]
+      sonnet: deepseek-v4-pro[1m]
+      haiku: deepseek-v4-flash[1m]
 
   # 示例：通过内部网关自定义后端
   internal:
@@ -474,6 +474,7 @@ cat ~/.hi/.cost.json | python3 -m json.tool
 
 ```
 [hi] INFO  15:07:03 #2 POST deepseek /v1/messages 200 634ms
+[hi] INFO  15:07:03 #2 tokens: in=114 out=120
 [hi] DEBUG 15:07:03   -> upstream: POST https://api.anthropic.com/v1/messages
 [hi] DEBUG 15:07:03   <- status=200 content-type=application/json
 [hi] DEBUG 15:07:03 Model remap: claude-sonnet-4-6 → deepseek-v4-pro
