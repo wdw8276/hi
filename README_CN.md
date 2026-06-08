@@ -4,7 +4,8 @@
 
 **对 Claude Code 零侵入的多后端代理。** 不修改 Claude Code、不需要 fork、不依赖插件。hi 位于 Claude Code 和网络之间——仅拦截 API 调用——退出时恢复一切原样。你的 Claude Code 始终保持原生状态。
 
-可连接**任意** Anthropic 兼容 API：Claude、DeepSeek、OpenRouter、内部网关和自定义端点。在同一个 session 中热切换所有后端，无需重启。
+可连接**任意** Anthropic 兼容 API。官方支持 **Claude**、**DeepSeek**、**MiniMax**、
+**GLM**、**Kimi**、OpenRouter、内部网关和自定义端点。在同一个 session 中热切换所有后端，无需重启。
 
 名称由来：每一次打开 Claude Code 或其他 AI agent 工具，第一句话都是从一句 **hi** 开始。AI 回复"你好，有什么可以帮助你的？"——然后工作就开始了。简单、好记、贴合 AI 时代。如有更好的名称也会更换。
 

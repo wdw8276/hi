@@ -7,9 +7,9 @@ modifications, no forks, no plugins. hi sits between Claude Code and
 the network — intercepting only API calls — and restores everything on
 exit. Your Claude Code stays vanilla.
 
-Connect to **any** Anthropic‑compatible API: Claude, DeepSeek, OpenRouter,
-internal gateways, and custom endpoints. Hot‑switch between all of them
-without restarting your session.
+Connect to **any** Anthropic‑compatible API. Officially supports **Claude**,
+**DeepSeek**, **MiniMax**, **GLM**, **Kimi**, OpenRouter, internal gateways, and
+custom endpoints. Hot‑switch between all of them without restarting your session.
 
 The name comes from the first word you type into any Claude Code or AI agent
 session — **hi**. The agent replies "Hello, how can I help you?" and the work
