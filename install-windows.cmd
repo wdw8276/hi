@@ -20,7 +20,8 @@ for /f "tokens=*" %%i in ('findstr "tag_name" "%RELEASE_JSON%"') do set TAG_LINE
 del "%RELEASE_JSON%" >nul 2>&1
 if "%TAG_LINE%"=="" (
     echo Failed to fetch latest release from GitHub.
-    echo If you are behind a proxy, set HTTP_PROXY and HTTPS_PROXY first.
+    echo This may be a rate-limit issue ^(too many requests^). Wait a few minutes and try again.
+    echo If behind a proxy, set HTTP_PROXY and HTTPS_PROXY first.
     exit /b 1
 )
 
