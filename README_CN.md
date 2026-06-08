@@ -522,4 +522,4 @@ savings: 0.0618                 ← 节省 85.6%
 
 ## License
 
-MIT
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — 个人和非商业用途免费。商业使用需获得明确授权。
