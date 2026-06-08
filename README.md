@@ -40,6 +40,12 @@ protocol, making it a universal multi-backend proxy.
   - [DeepSeek Platform](https://platform.deepseek.com/api_keys) — DeepSeek API key
   - Your organization's internal API gateway
 
+| Feature | Status |
+|---------|--------|
+| Claude Code version | Tested up to **2.1.168** (latest) |
+| Hot-switch backends | ✅ Claude, DeepSeek, and all custom backends |
+| Web Search | ✅ Works on all supported models |
+
 ### Install (Linux / macOS)
 
 ```bash
