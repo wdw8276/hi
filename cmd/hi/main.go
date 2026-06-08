@@ -57,15 +57,17 @@ var (
 func main() {
 	if len(os.Args) >= 2 {
 		switch os.Args[1] {
-		case "launch":
+		case "launch", "agent", "cc":
+			checkClaude()
 			initLogging()
-			cmdLaunch()
+			if os.Args[1] == "launch" {
+				cmdLaunch()
+			} else {
+				cmdAgent()
+			}
 		case "proxy":
 			initLogging()
 			cmdProxy()
-		case "agent", "cc":
-			initLogging()
-			cmdAgent()
 		case "status":
 			cmdStatus()
 		case "statusline":
@@ -81,8 +83,16 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
+		checkClaude()
 		initLogging()
 		cmdLaunch()
+	}
+}
+
+func checkClaude() {
+	if _, err := exec.LookPath("claude"); err != nil {
+		fmt.Fprintf(os.Stderr, "hi: Claude Code not found in PATH. Is it installed? https://code.claude.com/docs/en/quickstart\n")
+		os.Exit(1)
 	}
 }
 
@@ -412,7 +422,7 @@ func cmdLaunch() {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			os.Exit(exitErr.ExitCode())
 		}
-		logx.Fatalf("Failed to run Claude Code: %v", err)
+		logx.Warn("Claude Code exited with error: %v", err)
 	}
 
 	fmt.Println("\nhi: Claude Code exited. Proxy stopped.")
@@ -489,7 +499,7 @@ func cmdAgent() {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			os.Exit(exitErr.ExitCode())
 		}
-		logx.Fatalf("Failed to run Claude Code: %v", err)
+		logx.Warn("Claude Code exited with error: %v", err)
 	}
 }
 
