@@ -16,6 +16,19 @@ session — **hi**. The agent replies "Hello, how can I help you?" and the work
 begins. Simple, memorable, and fitting for the AI era. May evolve if a better
 name comes along.
 
+### Why hi?
+
+hi currently prioritizes **Claude Code** — arguably the best harness agent tool
+available today. However, CC is also the most expensive. For everyday users
+who rely on harness agents heavily but don't have a bottomless budget, the
+cost can be prohibitive. DeepSeek, on the other hand, offers some of the most
+affordable large models in the world. Pairing Claude Code with DeepSeek makes
+for a fantastic combination: top-tier agent capabilities at a fraction of the
+price.
+
+Looking ahead, hi plans to support more agent tools and the OpenAI API
+protocol, making it a universal multi-backend proxy.
+
 ## Quick start
 
 ### Prerequisites
