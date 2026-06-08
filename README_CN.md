@@ -495,7 +495,7 @@ Backends:
 
 ## 从源码构建
 
-需要 [Go 1.25+](https://go.dev/dl/)。
+需要 [Go 1.21+](https://go.dev/dl/)。
 
 ```bash
 git clone https://github.com/mars-base/hi.git
