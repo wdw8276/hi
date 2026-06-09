@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hi — Multi-Backend Proxy for Claude Code</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 680px; padding: 60px 24px; text-align: center; }
+        h1 { font-size: 64px; color: #58a6ff; margin-bottom: 12px; }
+        .tagline { font-size: 20px; color: #8b949e; margin-bottom: 40px; }
+        .features { text-align: left; margin: 32px 0; padding: 24px; background: #161b22; border-radius: 8px; border: 1px solid #30363d; }
+        .features li { padding: 6px 0; list-style: none; }
+        .features li::before { content: '✅ '; }
+        .install-block { position: relative; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 48px 14px 16px; margin: 12px 0; text-align: left; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; color: #c9d1d9; overflow-x: auto; white-space: nowrap; }
+        .install-block .label { display: block; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; color: #8b949e; margin-bottom: 6px; }
+        .install-block .cmd { color: #ffa657; }
+        .btn { display: inline-block; background: #238636; color: #fff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-size: 16px; margin: 8px; cursor: pointer; }
+        .btn:hover { background: #2ea043; }
+        .btn-outline { background: transparent; border: 1px solid #30363d; color: #c9d1d9; }
+        .btn-outline:hover { background: #1a1e24; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: #21262d; border: 1px solid #30363d; color: #8b949e; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+        .copy-btn:hover { background: #30363d; color: #c9d1d9; }
+        .copy-btn.copied { background: #238636; color: #fff; border-color: #238636; }
+        .footer { margin-top: 48px; color: #484f58; font-size: 13px; }
+        a { color: #58a6ff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>hi</h1>
+        <p class="tagline">Zero‑intrusion multi‑backend proxy for Claude Code</p>
+
+        <div class="install-block">
+            <span class="label">Linux / macOS</span>
+            <span class="cmd">curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install.sh | sh</span>
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+        </div>
+        <div class="install-block">
+            <span class="label">Windows PowerShell</span>
+            <span class="cmd">irm https://raw.githubusercontent.com/mars-base/hi/main/install-windows.ps1 | iex</span>
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+        </div>
+        <div class="install-block">
+            <span class="label">Windows CMD</span>
+            <span class="cmd">curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd</span>
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+        </div>
+
+        <div class="features">
+            <li>Hot-switch between Claude, DeepSeek, MiniMax, GLM, Kimi</li>
+            <li>Zero intrusion — no files modified, restored on exit</li>
+            <li>Cross-platform single binary — download and run, no dependencies</li>
+            <li>Cost tracking with persistence across sessions</li>
+            <li>Auto-generated slash commands for instant switching</li>
+        </div>
+
+        <a class="btn" href="https://github.com/mars-base/hi">GitHub</a>
+        <a class="btn btn-outline" href="https://github.com/mars-base/hi/releases">Download</a>
+
+        <p class="footer">CC BY-NC 4.0 — mars-base/hi</p>
+    </div>
+    <script>
+        function copy(btn) {
+            const block = btn.parentElement;
+            const cmd = block.querySelector('.cmd').textContent;
+            navigator.clipboard.writeText(cmd).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>
