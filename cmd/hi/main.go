@@ -41,11 +41,12 @@ Options:
   --preserve-statusline  Keep the existing statusLine command (don't replace with hi)
 
 Examples:
-  hi                                          # Launch proxy + Claude Code with Claude
-  hi launch --backend claude --log-level debug # Launch with Claude, debug logging
-  hi proxy --log-file /tmp/hi.log           # Proxy only, log to file
-  hi agent --backend deepseek                 # Attach CC to existing proxy
-  hi status                                    # Show config
+  hi                                              # Launch proxy + Claude Code
+  hi launch --backend claude --log-level debug    # Launch with Claude, debug logging
+  hi cc                                           # Attach agent to existing proxy
+  hi agent --backend deepseek                     # Attach with custom backend
+  hi proxy --log-file /tmp/hi.log                 # Proxy only, log to file
+  hi status                                       # Show config
 `
 
 var (
