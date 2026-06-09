@@ -197,6 +197,7 @@ backends:
     base_url: https://api.deepseek.com/anthropic
     api_key: "${DEEPSEEK_API_KEY}"
     strip_thinking: true     # remove top-level thinking config
+    reasoning_effort: max    # optional: output_config.effort (deepseek only)
     pricing:
       input: 0.42
       output: 0.83
@@ -287,6 +288,7 @@ Key points:
 - `models.opus/sonnet/haiku` — maps Claude model names to backend‑specific IDs
 - `pricing` — USD per 1M tokens, used by cost tracking
 - `context_window` — max context window size in tokens for statusline display. Default: ``1000000`` for `deepseek`, ``200000`` for other types
+- `reasoning_effort` — sets `output_config.effort` for deepseek backends: `max` / `high`. Empty to disable. Default: empty
 
 > **DeepSeek 1M context window**: for the official DeepSeek API, append
 > ``[1m]`` to the model name to unlock the 1M‑token context window. Write
