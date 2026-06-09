@@ -23,6 +23,11 @@
         .copy-btn { position: absolute; top: 10px; right: 10px; background: #21262d; border: 1px solid #30363d; color: #8b949e; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
         .copy-btn:hover { background: #30363d; color: #c9d1d9; }
         .copy-btn.copied { background: #238636; color: #fff; border-color: #238636; }
+        .quickstart { text-align: left; margin: 32px 0; padding: 24px; background: #161b22; border-radius: 8px; border: 1px solid #30363d; }
+        .quickstart h2 { font-size: 18px; color: #e6edf3; margin-bottom: 12px; }
+        .quickstart code { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 2px 6px; font-size: 13px; color: #ffa657; }
+        .quickstart .step { margin: 8px 0; font-size: 14px; color: #8b949e; }
+        .quickstart .step code { display: inline-block; margin-top: 2px; }
         .footer { margin-top: 48px; color: #484f58; font-size: 13px; }
         a { color: #58a6ff; text-decoration: none; }
     </style>
@@ -46,6 +51,22 @@
             <span class="label">Windows CMD</span>
             <span class="cmd">curl -fsSL https://raw.githubusercontent.com/mars-base/hi/main/install-windows.cmd -o install.cmd && install.cmd && del install.cmd</span>
             <button class="copy-btn" onclick="copy(this)">Copy</button>
+        </div>
+
+        <div class="quickstart">
+            <h2>Quick Start</h2>
+            <div class="step"><code>hi init-config</code> — auto-detect settings</div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:24px;">→ Config — you can edit the following files if needed:</div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:24px;">→ Linux/macOS: <code style="color:#c9d1d9;">~/.hi/config.yaml</code></div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:24px;">→ Windows: <code style="color:#c9d1d9;">%USERPROFILE%\.hi\config.yaml</code></div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:24px;">→ Or skip config, use env vars:</div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:48px;">Linux/macOS: <code style="color:#ffa657;">ANTHROPIC_API_KEY=sk-xxx DEEPSEEK_API_KEY=sk-xxx hi</code></div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:48px;">PowerShell: <code style="color:#ffa657;">$env:ANTHROPIC_API_KEY="sk-xxx"; $env:DEEPSEEK_API_KEY="sk-xxx"; hi</code></div>
+            <div class="step" style="color:#8b949e;font-size:13px;padding-left:48px;">CMD: <code style="color:#ffa657;">set ANTHROPIC_API_KEY=sk-xxx && set DEEPSEEK_API_KEY=sk-xxx && hi</code></div>
+            <div class="step"><code>hi</code> — launch proxy + Claude Code</div>
+            <div class="step"><code>hi cc</code> — attach agent to existing proxy</div>
+            <div class="step"><code>hi proxy</code> — proxy only, no Claude Code</div>
+            <div class="step"><code>/deepseek</code> <code>/claude</code> — hot-switch backends</div>
         </div>
 
         <div class="features">
