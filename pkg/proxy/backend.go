@@ -38,6 +38,10 @@ type Backend interface {
 	// true for deepseek, false for anthropic.
 	StripTopLevelThinking() bool
 
+	// ReasoningEffort returns the output_config.effort level for this backend.
+	// Used by deepseek-type backends to set max reasoning. Empty means disabled.
+	ReasoningEffort() string
+
 	// ModelInfo returns the backend's tier model names for logging.
 	ModelInfo() map[string]string
 }
@@ -64,6 +68,7 @@ type anthropicBackend struct {
 	apiKey        string
 	modelMap      map[string]string
 	stripTopThink bool
+	reasonEffort  string
 }
 
 func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBackend, error) {
@@ -93,6 +98,7 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 		target:        u,
 		apiKey:        apiKey,
 		stripTopThink: cfg.ShouldStripThinking(),
+		reasonEffort:  cfg.ReasoningEffort,
 		modelMap: map[string]string{
 			"claude-opus-4-6":            cfg.Models.Opus,
 			"claude-opus-4-7":            cfg.Models.Opus,
@@ -107,6 +113,7 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 func (b *anthropicBackend) Name() string                { return b.name }
 func (b *anthropicBackend) NeedsThinkingStrip() bool    { return false }
 func (b *anthropicBackend) StripTopLevelThinking() bool { return b.stripTopThink }
+func (b *anthropicBackend) ReasoningEffort() string     { return b.reasonEffort }
 
 func (b *anthropicBackend) TargetURL() *url.URL { return b.target }
 
@@ -142,6 +149,7 @@ type deepseekBackend struct {
 	apiKey        string
 	modelMap      map[string]string
 	stripTopThink bool
+	reasonEffort  string
 }
 
 func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend, error) {
@@ -165,6 +173,7 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 		target:        u,
 		apiKey:        apiKey,
 		stripTopThink: cfg.ShouldStripThinking(),
+		reasonEffort:  cfg.ReasoningEffort,
 		modelMap: map[string]string{
 			"claude-opus-4-6":            cfg.Models.Opus,
 			"claude-opus-4-7":            cfg.Models.Opus,
@@ -179,6 +188,7 @@ func newDeepSeekBackend(name string, cfg config.BackendConfig) (*deepseekBackend
 func (b *deepseekBackend) Name() string                { return b.name }
 func (b *deepseekBackend) NeedsThinkingStrip() bool    { return false }
 func (b *deepseekBackend) StripTopLevelThinking() bool { return b.stripTopThink }
+func (b *deepseekBackend) ReasoningEffort() string     { return b.reasonEffort }
 
 func (b *deepseekBackend) TargetURL() *url.URL { return b.target }
 

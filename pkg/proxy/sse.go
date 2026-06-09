@@ -46,6 +46,13 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		}
 	}
 
+	// Inject output_config.effort for deepseek backends if configured.
+	if eff := backend.ReasoningEffort(); eff != "" {
+		parsed["output_config"] = map[string]interface{}{"effort": eff}
+		changed = true
+		logx.Debug("Injected output_config.effort=%s (backend: %s)", eff, activeName)
+	}
+
 	// Strip thinking blocks from message content.
 	if backend.NeedsThinkingStrip() {
 		if messages, ok := parsed["messages"].([]interface{}); ok {

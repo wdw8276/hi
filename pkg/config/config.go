@@ -134,6 +134,9 @@ type BackendConfig struct {
 	// ContextWindow is the max context window size for this backend.
 	// Used by statusline. Default: 1M for deepseek, 200k for anthropic.
 	ContextWindow *int64 `yaml:"context_window,omitempty"`
+	// ReasoningEffort sets the output_config.effort level for deepseek-type
+	// backends. Values: "high" (default), "max". Ignored for anthropic type.
+	ReasoningEffort string `yaml:"reasoning_effort,omitempty"`
 }
 
 // ShouldStripThinking returns whether the top-level "thinking" config should be
