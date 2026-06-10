@@ -7,15 +7,15 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { max-width: 680px; padding: 60px 24px; text-align: center; }
+        .container { max-width: 680px; width: 100%; padding: 60px 24px; text-align: center; }
         h1 { font-size: 64px; color: #58a6ff; margin-bottom: 12px; }
         .tagline { font-size: 20px; color: #8b949e; margin-bottom: 40px; }
         .features { text-align: left; margin: 32px 0; padding: 24px; background: #161b22; border-radius: 8px; border: 1px solid #30363d; }
         .features li { padding: 6px 0; list-style: none; }
         .features li::before { content: '✅ '; }
-        .install-block { position: relative; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 48px 14px 16px; margin: 12px 0; text-align: left; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; color: #c9d1d9; overflow-x: auto; white-space: nowrap; }
+        .install-block { position: relative; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 48px 14px 16px; margin: 12px 0; text-align: left; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; color: #c9d1d9; overflow-x: auto; }
         .install-block .label { display: block; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; color: #8b949e; margin-bottom: 6px; }
-        .install-block .cmd { color: #ffa657; }
+        .install-block .cmd { color: #ffa657; word-break: break-all; }
         .btn { display: inline-block; background: #238636; color: #fff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-size: 16px; margin: 8px; cursor: pointer; }
         .btn:hover { background: #2ea043; }
         .btn-outline { background: transparent; border: 1px solid #30363d; color: #c9d1d9; }
@@ -25,11 +25,31 @@
         .copy-btn.copied { background: #238636; color: #fff; border-color: #238636; }
         .quickstart { text-align: left; margin: 32px 0; padding: 24px; background: #161b22; border-radius: 8px; border: 1px solid #30363d; }
         .quickstart h2 { font-size: 18px; color: #e6edf3; margin-bottom: 12px; }
-        .quickstart code { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 2px 6px; font-size: 13px; color: #ffa657; }
+        .quickstart code { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 2px 6px; font-size: 13px; color: #ffa657; word-break: break-all; }
         .quickstart .step { margin: 8px 0; font-size: 14px; color: #8b949e; }
         .quickstart .step code { display: inline-block; margin-top: 2px; }
         .footer { margin-top: 48px; color: #484f58; font-size: 13px; }
         a { color: #58a6ff; text-decoration: none; }
+        .models { text-align: left; margin: 32px 0; }
+        .models h2 { font-size: 18px; color: #e6edf3; margin-bottom: 16px; text-align: center; }
+        .models-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .models-table th { text-align: left; padding: 8px 12px; border-bottom: 1px solid #30363d; color: #8b949e; font-weight: 500; font-size: 12px; text-transform: uppercase; }
+        .models-table td { padding: 8px 12px; border-bottom: 1px solid #21262d; }
+        .models-table .model-name { color: #e6edf3; font-weight: 500; }
+        .models-table a { color: #58a6ff; font-size: 12px; }
+        @media (max-width: 480px) {
+            .container { padding: 32px 16px; }
+            h1 { font-size: 48px; }
+            .tagline { font-size: 16px; margin-bottom: 28px; }
+            .install-block { padding: 12px 12px 12px 12px; font-size: 12px; }
+            .copy-btn { position: static; display: block; margin-top: 10px; width: 100%; text-align: center; }
+            .features { padding: 16px; }
+            .quickstart { padding: 16px; }
+            .quickstart .step { font-size: 13px; }
+            .btn { display: block; margin: 8px 0; }
+            .models-table { font-size: 12px; }
+            .models-table td, .models-table th { padding: 6px 8px; }
+        }
     </style>
 </head>
 <body>
@@ -70,11 +90,53 @@
         </div>
 
         <div class="features">
-            <li>Hot-switch between Claude, DeepSeek, MiniMax, GLM, Kimi</li>
+            <li>Hot-switch between Claude, DeepSeek, MiniMax, GLM, Kimi, Qwen, MIMO</li>
             <li>Zero intrusion — no files modified, restored on exit</li>
             <li>Cross-platform single binary — download and run, no dependencies</li>
             <li>Cost tracking with persistence across sessions</li>
             <li>Auto-generated slash commands for instant switching</li>
+        </div>
+
+        <div class="models">
+            <h2>Supported Models</h2>
+            <table class="models-table">
+                <tr><th>Provider</th><th>Model</th><th>Docs</th></tr>
+                <tr>
+                    <td class="model-name">Anthropic Claude</td>
+                    <td>Sonnet 4.6 / Opus 4.8 / Haiku 4.5</td>
+                    <td><a href="https://docs.anthropic.com">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">DeepSeek</td>
+                    <td>V4 Pro / V4 Flash</td>
+                    <td><a href="https://api-docs.deepseek.com">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">MiniMax</td>
+                    <td>M3</td>
+                    <td><a href="https://platform.minimax.io/docs/token-plan/claude-code">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">Zhipu GLM</td>
+                    <td>GLM 5.1</td>
+                    <td><a href="https://docs.z.ai/devpack/tool/claude">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">Moonshot Kimi</td>
+                    <td>Kimi K2.6</td>
+                    <td><a href="https://www.kimi.com/code/docs/en/">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">Alibaba Qwen</td>
+                    <td>Qwen 3.7-Max</td>
+                    <td><a href="https://www.alibabacloud.com/help/en/model-studio/claude-code">Docs</a></td>
+                </tr>
+                <tr>
+                    <td class="model-name">Xiaomi MIMO</td>
+                    <td>MIMO V2.5-Pro</td>
+                    <td><a href="https://platform.xiaomimimo.com/docs/en-US/api/chat/anthropic-api">Docs</a></td>
+                </tr>
+            </table>
         </div>
 
         <a class="btn" href="https://github.com/mars-base/hi">GitHub</a>

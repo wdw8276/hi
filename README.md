@@ -8,8 +8,9 @@ the network — intercepting only API calls — and restores everything on
 exit. Your Claude Code stays vanilla.
 
 Connect to **any** Anthropic‑compatible API. Officially supports **Claude**,
-**DeepSeek**, **MiniMax**, **GLM**, **Kimi**, OpenRouter, internal gateways, and
-custom endpoints. Hot‑switch between all of them without restarting your session.
+**DeepSeek**, **MiniMax**, **GLM**, **Kimi**, **Qwen**, **MIMO**, OpenRouter,
+internal gateways, and custom endpoints. Hot‑switch between all of them without
+restarting your session.
 
 The name comes from the first word you type into any Claude Code or AI agent
 session — **hi**. The agent replies "Hello, how can I help you?" and the work
@@ -165,6 +166,8 @@ providers and their endpoints:
 | MiniMax | `anthropic` | `https://api.minimax.io/anthropic` | [Docs](https://platform.minimax.io/docs/token-plan/claude-code) |
 | GLM (z.ai) | `anthropic` | `https://api.z.ai/api/anthropic` | [Docs](https://docs.z.ai/devpack/tool/claude) |
 | Kimi | `anthropic` | `https://api.kimi.com/coding/` | [Docs](https://www.kimi.com/code/docs/en/) |
+| Qwen (Alibaba) | `anthropic` | `https://dashscope-intl.aliyuncs.com/apps/anthropic` | [Claude Code Guide](https://www.alibabacloud.com/help/en/model-studio/claude-code) |
+| MIMO (Xiaomi) | `anthropic` | `https://api.xiaomimimo.com/anthropic` | [Docs](https://platform.xiaomimimo.com/docs/en-US/api/chat/anthropic-api) |
 
 > Any gateway or proxy that speaks the Anthropic API protocol (e.g. Leihuo,
 > OpenRouter, OneAPI, internal gateways) also works — just set `type: anthropic`
@@ -527,8 +530,13 @@ make install
 |------|--------|--------|
 | Claude Opus | $3.00 | $15.00 |
 | DeepSeek V4 | $0.42 | $0.83 |
+| MiniMax M3 | $0.30 | $1.20 |
+| GLM 5.1 | $0.959 | $3.836 |
+| Kimi K2.6 | $0.89 | $3.74 |
+| Qwen 3.7-Max | $0.822 | $2.466 |
+| MIMO V2.5-Pro | $0.411 | $0.822 |
 
-Heavy usage (25 days/month): $30-80 vs $200 — 60-85% savings.
+Heavy usage (25 days/month): as low as $15-30 vs $200 — 85-92% savings.
 
 The proxy tracks and reports savings in real time:
 
