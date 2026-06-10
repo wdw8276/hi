@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
 
 	"github.com/mars-base/hi/pkg/logx"
 	"gopkg.in/yaml.v3"
@@ -566,10 +565,10 @@ func atomicRefCount(path string, delta int) int {
 	defer f.Close()
 
 	// Exclusive lock.
-	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+	if err := flockLock(f); err != nil {
 		return 0
 	}
-	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+	defer flockUnlock(f)
 
 	// Read current value.
 	data, _ := io.ReadAll(f)
