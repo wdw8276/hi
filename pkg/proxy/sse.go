@@ -39,7 +39,13 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 	// but Claude Code's tool-use requests (web search, fetch) may omit it.
 	// Removing the top-level config avoids the "thinking options type cannot
 	// be disabled when reasoning_effort is set" error.
-	if backend.StripTopLevelThinking() {
+	//
+	// However, when the conversation has no thinking blocks yet (fresh session
+	// or switched from claude), we must KEEP the thinking config so deepseek
+	// knows to enable thinking mode for its model (deepseek-v4-pro defaults
+	// to thinking mode and rejects requests without thinking blocks).
+	hasThinking := hasThinkingBlocks(parsed)
+	if backend.StripTopLevelThinking() && hasThinking {
 		if _, ok := parsed["thinking"]; ok {
 			delete(parsed, "thinking")
 			changed = true
@@ -47,33 +53,86 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		}
 	}
 
-	// Inject output_config.effort for deepseek backends if configured.
-	if eff := backend.ReasoningEffort(); eff != "" {
-		parsed["output_config"] = map[string]interface{}{"effort": eff}
-		changed = true
-		logx.Debug("Injected output_config.effort=%s (backend: %s)", eff, activeName)
+	// For backends that keep thinking blocks (deepseek etc.), inject the
+	// thinking config if missing when the conversation has no thinking blocks
+	// yet — otherwise the model defaults to thinking mode and complains that
+	// messages lack thinking blocks.
+	if !backend.NeedsThinkingStrip() && !hasThinking {
+		if _, ok := parsed["thinking"]; !ok {
+			parsed["thinking"] = map[string]interface{}{
+				"type":          "enabled",
+				"budget_tokens": 32000,
+			}
+			changed = true
+			logx.Debug("Injected thinking config (fresh session, backend: %s)", activeName)
+		}
 	}
 
-	// Strip thinking blocks from message content.
-	if backend.NeedsThinkingStrip() {
-		if messages, ok := parsed["messages"].([]interface{}); ok {
-			for _, msg := range messages {
-				if msgMap, ok := msg.(map[string]interface{}); ok {
-					if content, ok := msgMap["content"].([]interface{}); ok {
-						filtered := make([]interface{}, 0, len(content))
-						for _, block := range content {
-							if blockMap, ok := block.(map[string]interface{}); ok {
-								if blockMap["type"] == "thinking" {
-									changed = true
-									continue
-								}
+	// Strip context_management for backends that don't strip thinking
+	// (deepseek, kimi, minimax, glm51). context_management.edits with
+	// clear_thinking_20251015 signals that thinking blocks were cleared
+	// from context; deepseek interprets this as "thinking mode active"
+	// and requires thinking blocks in every message — causing 400.
+	if !backend.NeedsThinkingStrip() {
+		if _, ok := parsed["context_management"]; ok {
+			delete(parsed, "context_management")
+			changed = true
+			logx.Debug("Stripped context_management (backend: %s)", activeName)
+		}
+	}
+
+
+	// Strip non-standard content blocks from messages (citations, thinking).
+	// - citations: produced by deepseek, rejected by claude/Bedrock
+	// - thinking: deepseek requires once enabled; safest to strip when switching
+	if messages, ok := parsed["messages"].([]interface{}); ok {
+		stripTypes := map[string]bool{"citations": true}
+		if backend.NeedsThinkingStrip() {
+			stripTypes["thinking"] = true
+			stripTypes["redacted_thinking"] = true
+		}
+		stripped := 0
+		for _, msg := range messages {
+			if msgMap, ok := msg.(map[string]interface{}); ok {
+				if content, ok := msgMap["content"].([]interface{}); ok {
+					filtered := make([]interface{}, 0, len(content))
+					for _, block := range content {
+						if blockMap, ok := block.(map[string]interface{}); ok {
+							if stripTypes[blockMap["type"].(string)] {
+								stripped++
+								changed = true
+								continue
 							}
-							filtered = append(filtered, block)
+							// Remove "citations" field nested inside content blocks
+							// (e.g. tool_use.citations). DeepSeek adds these; Bedrock rejects them.
+							if _, has := blockMap["citations"]; has {
+								delete(blockMap, "citations")
+								stripped++
+								changed = true
+							}
 						}
-						msgMap["content"] = filtered
+						filtered = append(filtered, block)
 					}
+					msgMap["content"] = filtered
 				}
 			}
+		}
+		if stripped > 0 {
+			logx.Debug("Stripped %d block(s) from messages (backend: %s)", stripped, activeName)
+		}
+	}
+
+	// Inject output_config.effort for deepseek backends if configured.
+	// Only inject if the conversation already contains thinking blocks —
+	// otherwise DeepSeek forces thinking mode and rejects messages that
+	// lack thinking blocks (e.g. session switched from claude).
+	if eff := backend.ReasoningEffort(); eff != "" {
+		if hasThinkingBlocks(parsed) {
+			parsed["output_config"] = map[string]interface{}{"effort": eff}
+			changed = true
+			logx.Debug("Injected output_config.effort=%s (backend: %s)", eff, activeName)
+		} else {
+			logx.Debug("Skipped output_config.effort: no thinking blocks in conversation")
 		}
 	}
 
@@ -86,6 +145,37 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		return body
 	}
 	return newBody
+}
+
+// hasThinkingBlocks returns true if any assistant message in the
+// conversation contains a thinking block.
+func hasThinkingBlocks(parsed map[string]interface{}) bool {
+	messages, ok := parsed["messages"].([]interface{})
+	if !ok {
+		return false
+	}
+	for _, msg := range messages {
+		msgMap, ok := msg.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if role, _ := msgMap["role"].(string); role != "assistant" {
+			continue
+		}
+		content, ok := msgMap["content"].([]interface{})
+		if !ok {
+			continue
+		}
+		for _, block := range content {
+			if blockMap, ok := block.(map[string]interface{}); ok {
+				t, _ := blockMap["type"].(string)
+				if t == "thinking" || t == "redacted_thinking" {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 // processResponse handles the upstream response — normalizing SSE, tracking costs,

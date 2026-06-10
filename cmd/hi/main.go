@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -444,6 +445,22 @@ func cmdAgent() {
 		logx.Fatalf("Unknown backend: %s", backend)
 	}
 
+	// If --backend was specified explicitly, check proxy status and switch if needed.
+	if parseBackend() != "" {
+		if active, ok := proxyStatus(cfg.ProxyPort); ok {
+			if active != backend {
+				fmt.Printf("hi: switching proxy backend: %s → %s\n", active, backend)
+				if err := proxySwitch(cfg.ProxyPort, backend); err != nil {
+					logx.Warn("Failed to switch proxy backend: %v", err)
+				} else {
+					logx.Info("Switched proxy backend: %s → %s", active, backend)
+				}
+			} else {
+				logx.Debug("Proxy already on backend %s, no switch needed", backend)
+			}
+		}
+	}
+
 	apiKey := config.ResolveAPIKey(bc.APIKey)
 	proxyURL := fmt.Sprintf("http://127.0.0.1:%d", cfg.ProxyPort)
 
@@ -502,6 +519,42 @@ func cmdAgent() {
 		}
 		logx.Warn("Claude Code exited with error: %v", err)
 	}
+}
+
+// proxyStatus queries the proxy's /_proxy/status endpoint and returns
+// the current active backend. The second return value is false if the
+// proxy is not reachable.
+func proxyStatus(port int) (string, bool) {
+	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/_proxy/status", port))
+	if err != nil {
+		return "", false
+	}
+	defer resp.Body.Close()
+	var s struct {
+		ActiveBackend string `json:"active_backend"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&s); err != nil {
+		return "", false
+	}
+	return s.ActiveBackend, true
+}
+
+// proxySwitch sends POST /_proxy/mode to switch the active backend.
+func proxySwitch(port int, backend string) error {
+	body := fmt.Sprintf("backend=%s", backend)
+	resp, err := http.Post(
+		fmt.Sprintf("http://127.0.0.1:%d/_proxy/mode", port),
+		"application/x-www-form-urlencoded",
+		strings.NewReader(body),
+	)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("unexpected status %d", resp.StatusCode)
+	}
+	return nil
 }
 
 func parseBackend() string {

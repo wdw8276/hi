@@ -243,8 +243,15 @@ func (ps *ProxyState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logx.Info("#%d %s %s %s %d %s", ps.RequestCount(), r.Method, backend.Name(), path, resp.StatusCode, elapsed.Round(time.Millisecond))
 	logx.Debug("  -> upstream: %s %s", r.Method, upstreamURL.String())
 	logx.Debug("  <- status=%d content-type=%s", resp.StatusCode, resp.Header.Get("Content-Type"))
-	logx.Debug("  -> upstream: %s %s", r.Method, upstreamURL.String())
-	logx.Debug("  <- status=%d content-type=%s", resp.StatusCode, resp.Header.Get("Content-Type"))
+
+	// Log request body on non-2xx responses for diagnosis.
+	if resp.StatusCode >= 400 {
+		bodyPreview := string(transformed)
+		if len(bodyPreview) > 2000 {
+			bodyPreview = bodyPreview[:2000] + "...(truncated)"
+		}
+		logx.Warn("  req body (status=%d): %s", resp.StatusCode, bodyPreview)
+	}
 
 	// Process the response (SSE normalization, cost tracking).
 	ps.processResponse(w, r, resp, backend)

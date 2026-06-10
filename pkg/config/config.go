@@ -436,7 +436,12 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 	if overrideStatusline {
 		if sl, ok := doc["statusLine"].(map[string]interface{}); ok {
 			if cmd, ok := sl["command"].(string); ok && cmd != "" {
-				setOriginalStatusCommand(cmd)
+				// Only save the original command if it is not already
+				// hi statusline (a later agent joining an already-patched
+				// session would otherwise overwrite the real original).
+				if !strings.Contains(cmd, "hi statusline") {
+					setOriginalStatusCommand(cmd)
+				}
 
 				// Find or install a stable hi binary.
 				home, _ := os.UserHomeDir()

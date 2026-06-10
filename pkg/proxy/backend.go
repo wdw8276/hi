@@ -111,7 +111,7 @@ func newAnthropicBackend(name string, cfg config.BackendConfig) (*anthropicBacke
 }
 
 func (b *anthropicBackend) Name() string                { return b.name }
-func (b *anthropicBackend) NeedsThinkingStrip() bool    { return false }
+func (b *anthropicBackend) NeedsThinkingStrip() bool    { return true }
 func (b *anthropicBackend) StripTopLevelThinking() bool { return b.stripTopThink }
 func (b *anthropicBackend) ReasoningEffort() string     { return b.reasonEffort }
 
