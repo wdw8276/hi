@@ -4,10 +4,12 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/mars-base/hi/pkg/logx"
 	"gopkg.in/yaml.v3"
@@ -366,6 +368,10 @@ func ccSettingsPath() (string, error) {
 // so Claude Code picks up dscli's values instead of what's in settings.
 // If overrideStatusline is true, also replaces statusLine.command with hi statusline.
 // Returns a restore function.
+//
+// Multiple agents: uses a reference count file (.hi-refcount) so that only
+// the LAST agent to exit restores the original settings.json. The first agent
+// creates the backup; subsequent agents share it.
 func CCOverride(vars map[string]string, overrideStatusline bool) (restore func(), _ error) {
 	sp, err := ccSettingsPath()
 	if err != nil {
@@ -373,15 +379,26 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 	}
 
 	bakPath := sp + ".hi-backup"
+	refPath := sp + ".hi-refcount"
 
-	// Step 0: if a stale backup exists from a previous crash (kill -9),
-	// restore the original settings.json now — BEFORE we read the file.
-	if err := recoverFromBackup(sp, bakPath); err != nil {
-		logx.Warn("failed to recover from stale backup: %v", err)
+	// Step 0: if a stale backup exists and NO agents are active (refcount=0),
+	// a previous run was kill -9'd. Restore settings.json before proceeding.
+	// If refcount > 0, other agents ARE running — the backup is legitimate.
+	if readRefCount(refPath) == 0 {
+		if err := recoverFromBackup(sp, bakPath, refPath); err != nil {
+			logx.Warn("failed to recover from stale backup: %v", err)
+		}
 	}
+
+	// Reference counting: only the first agent creates the backup,
+	// only the last agent restores it.
+	// Lock-protected to avoid races between concurrent hi cc processes.
+	refCount := atomicRefCount(refPath, +1)
+	logx.Debug("CCOverride refcount: %d", refCount+1)
 
 	data, err := os.ReadFile(sp)
 	if err != nil {
+		atomicRefCount(refPath, -1)
 		return func() {}, err
 	}
 
@@ -393,6 +410,7 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 
 	var doc map[string]interface{}
 	if err := json.Unmarshal(data, &doc); err != nil {
+		atomicRefCount(refPath, -1)
 		return func() {}, err
 	}
 
@@ -404,6 +422,7 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 
 	envMap, ok := envRaw.(map[string]interface{})
 	if !ok {
+		atomicRefCount(refPath, -1)
 		return func() {}, err
 	}
 
@@ -485,33 +504,99 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 	logx.Info("patched ~/.claude/settings.json env: %d vars overwritten", len(vars))
 
 	// Write backup to disk so we can recover if kill -9'd.
-	// If bakPath already exists (another hi started first), don't
-	// overwrite it — the first instance owns the original backup.
-	isPrimary := false
-	if _, err := os.Stat(bakPath); os.IsNotExist(err) {
+	// Only the first agent creates the backup (refcount 0→1, so new value is 1).
+	if refCount == 1 {
 		os.WriteFile(bakPath, backup, 0600)
-		isPrimary = true
+		logx.Info("CCOverride: created backup (%d agent(s) active)", refCount)
+	} else {
+		logx.Info("CCOverride: joined (%d agent(s) active)", refCount)
 	}
 
 	restore = func() {
-		if !isPrimary {
-			// We are a secondary hi instance (e.g. hi cc).
-			// Our backup is the already-patched file, so no-op.
+		remaining := atomicRefCount(refPath, -1)
+		logx.Info("CCOverride restore: %d agent(s) remaining", remaining)
+		if remaining > 0 {
 			return
 		}
-		if err := os.WriteFile(sp, backup, 0600); err != nil {
-			logx.Warn("failed to restore ~/.claude/settings.json: %v", err)
+		// Last agent: restore original settings.json from backup FILE.
+		// (Not from in-memory 'backup' — later agents captured the already-patched version.)
+		if orig, err := os.ReadFile(bakPath); err == nil {
+			if err := os.WriteFile(sp, orig, 0600); err != nil {
+				logx.Warn("failed to restore ~/.claude/settings.json: %v", err)
+			} else {
+				logx.Info("restored ~/.claude/settings.json")
+			}
 		} else {
-			logx.Info("restored ~/.claude/settings.json")
+			logx.Warn("failed to read backup for restore: %v", err)
 		}
 		os.Remove(bakPath)
+		os.Remove(refPath)
 	}
 	return restore, nil
 }
 
+// readRefCount reads the reference count without locking (for crash detection only).
+func readRefCount(path string) int {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0
+	}
+	n := 0
+	for _, b := range data {
+		if b >= '0' && b <= '9' {
+			n = n*10 + int(b-'0')
+		}
+	}
+	return n
+}
+
+// atomicRefCount atomically adjusts the reference count by delta (+1 or -1)
+// and returns the NEW value. Uses flock to prevent races between concurrent
+// hi cc processes.
+func atomicRefCount(path string, delta int) int {
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return 0
+	}
+	defer f.Close()
+
+	// Exclusive lock.
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+		return 0
+	}
+	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+
+	// Read current value.
+	data, _ := io.ReadAll(f)
+	n := 0
+	for _, b := range data {
+		if b >= '0' && b <= '9' {
+			n = n*10 + int(b-'0')
+		}
+	}
+
+	// Adjust.
+	n += delta
+	if n < 0 {
+		n = 0
+	}
+
+	if n <= 0 {
+		f.Close()
+		os.Remove(path)
+		return 0
+	}
+
+	// Write new value.
+	f.Truncate(0)
+	f.Seek(0, 0)
+	fmt.Fprintf(f, "%d\n", n)
+	return n
+}
+
 // recoverFromBackup checks if a stale backup exists (meaning the last run
 // was kill -9'd without restoring). If so, restores settings.json from it.
-func recoverFromBackup(sp, bakPath string) error {
+func recoverFromBackup(sp, bakPath, refPath string) error {
 	data, err := os.ReadFile(bakPath)
 	if err != nil {
 		return nil // no backup, nothing to recover
@@ -520,6 +605,7 @@ func recoverFromBackup(sp, bakPath string) error {
 		return err
 	}
 	os.Remove(bakPath)
+	os.Remove(refPath) // stale refcount too
 	logx.Info("recovered ~/.claude/settings.json from backup (previous run was interrupted)")
 	return nil
 }

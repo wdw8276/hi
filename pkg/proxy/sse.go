@@ -31,6 +31,7 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 			changed = true
 			logx.Debug("Model remap: %s → %s", model, mapped)
 		}
+		logx.Debug("  final model: %s", parsed["model"])
 	}
 
 	// Strip top-level thinking config. Some backends (e.g. DeepSeek) require
