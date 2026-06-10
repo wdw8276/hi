@@ -246,11 +246,15 @@ func (ps *ProxyState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Log request body on non-2xx responses for diagnosis.
 	if resp.StatusCode >= 400 {
-		bodyPreview := string(transformed)
-		if len(bodyPreview) > 2000 {
-			bodyPreview = bodyPreview[:2000] + "...(truncated)"
+		bodyStr := string(transformed)
+		if len(bodyStr) > 2000 {
+			head := bodyStr[:500]
+			tail := bodyStr[len(bodyStr)-1000:]
+			logx.Warn("  req body head (status=%d): %s", resp.StatusCode, head)
+			logx.Warn("  req body tail (status=%d): %s", resp.StatusCode, tail)
+		} else {
+			logx.Warn("  req body (status=%d): %s", resp.StatusCode, bodyStr)
 		}
-		logx.Warn("  req body (status=%d): %s", resp.StatusCode, bodyPreview)
 	}
 
 	// Process the response (SSE normalization, cost tracking).

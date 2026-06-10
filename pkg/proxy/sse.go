@@ -3,6 +3,7 @@ package proxy
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/mars-base/hi/pkg/logx"
 	"io"
 	"net/http"
@@ -53,18 +54,57 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		}
 	}
 
-	// For backends that keep thinking blocks (deepseek etc.), inject the
-	// thinking config if missing when the conversation has no thinking blocks
-	// yet — otherwise the model defaults to thinking mode and complains that
-	// messages lack thinking blocks.
-	if !backend.NeedsThinkingStrip() && !hasThinking {
-		if _, ok := parsed["thinking"]; !ok {
-			parsed["thinking"] = map[string]interface{}{
-				"type":          "enabled",
-				"budget_tokens": 32000,
+	// For backends that keep thinking blocks (deepseek etc.), inject thinking config when missing. When switching from another backend leaves the conversation with thinking blocks in some but not all assistant messages, add empty thinking blocks to messages that lack them — deepseek-v4-pro requires ALL assistant messages to have thinking when enabled.
+	if !backend.NeedsThinkingStrip() {
+		mixed := isMixedThinking(parsed)
+		if mixed {
+			// deepseek-v4-pro requires ALL assistant messages to have thinking
+			// blocks when thinking mode is on. Some messages from claude lack
+			// them, causing 400. Add a minimal empty thinking block to any
+			// assistant message that doesn't have one.
+			if messages, ok := parsed["messages"].([]interface{}); ok {
+				for _, msg := range messages {
+					if msgMap, ok := msg.(map[string]interface{}); ok {
+						if role, _ := msgMap["role"].(string); role != "assistant" {
+							continue
+						}
+						if content, ok := msgMap["content"].([]interface{}); ok {
+							hasThinking := false
+							for _, block := range content {
+								if blockMap, ok := block.(map[string]interface{}); ok {
+									t := blockMap["type"].(string)
+									if t == "thinking" || t == "redacted_thinking" {
+										hasThinking = true
+										break
+									}
+								}
+							}
+							if !hasThinking {
+								emptyThink := map[string]interface{}{"type": "thinking", "thinking": ""}
+								msgMap["content"] = append([]interface{}{emptyThink}, content...)
+								changed = true
+							}
+						}
+					}
+				}
 			}
-			changed = true
-			logx.Debug("Injected thinking config (fresh session, backend: %s)", activeName)
+			if _, ok := parsed["thinking"]; !ok {
+				parsed["thinking"] = map[string]interface{}{"type": "enabled"}
+				changed = true
+			}
+			logx.Debug("Mixed thinking state detected — normalized thinking blocks, set thinking=enabled (backend: %s)", activeName)
+		} else {
+			think, ok := parsed["thinking"].(map[string]interface{})
+			if !ok {
+				think = map[string]interface{}{}
+				parsed["thinking"] = think
+				changed = true
+			}
+			if t, _ := think["type"].(string); t != "enabled" {
+				think["type"] = "enabled"
+				changed = true
+				logx.Debug("Injected thinking config (backend: %s)", activeName)
+			}
 		}
 	}
 
@@ -123,16 +163,28 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 	}
 
 	// Inject output_config.effort for deepseek backends if configured.
-	// Only inject if the conversation already contains thinking blocks —
-	// otherwise DeepSeek forces thinking mode and rejects messages that
-	// lack thinking blocks (e.g. session switched from claude).
+	// Only when thinking is enabled — otherwise deepseek rejects it.
 	if eff := backend.ReasoningEffort(); eff != "" {
-		if hasThinkingBlocks(parsed) {
+		thinkEnabled := false
+		if t, ok := parsed["thinking"].(map[string]interface{}); ok {
+			if tp, _ := t["type"].(string); tp == "enabled" {
+				thinkEnabled = true
+			}
+		}
+		if thinkEnabled {
 			parsed["output_config"] = map[string]interface{}{"effort": eff}
 			changed = true
 			logx.Debug("Injected output_config.effort=%s (backend: %s)", eff, activeName)
 		} else {
-			logx.Debug("Skipped output_config.effort: no thinking blocks in conversation")
+			// CC may have sent its own output_config — strip it to avoid
+			// deepseek interpreting it as thinking-enabled.
+			if _, ok := parsed["output_config"]; ok {
+				delete(parsed, "output_config")
+				changed = true
+				logx.Debug("Stripped output_config (thinking not enabled, backend: %s)", activeName)
+			} else {
+				logx.Debug("Skipped output_config.effort: thinking not enabled")
+			}
 		}
 	}
 
@@ -144,16 +196,77 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 	if err != nil {
 		return body
 	}
+
+	// Debug: log thinking-related fields for deepseek backends.
+	if !backend.NeedsThinkingStrip() {
+		thinkInfo := "<missing>"
+		if t, ok := parsed["thinking"]; ok {
+			thinkInfo = fmt.Sprintf("%v", t)
+		}
+		ctxInfo := "<missing>"
+		if c, ok := parsed["context_management"]; ok {
+			ctxInfo = fmt.Sprintf("%v", c)
+		}
+		outInfo := "<missing>"
+		if o, ok := parsed["output_config"]; ok {
+			outInfo = fmt.Sprintf("%v", o)
+		}
+		logx.Debug("Final body fields -> thinking=%s context_management=%s output_config=%s", thinkInfo, ctxInfo, outInfo)
+	}
+
 	return newBody
 }
 
 // hasThinkingBlocks returns true if any assistant message in the
 // conversation contains a thinking block.
 func hasThinkingBlocks(parsed map[string]interface{}) bool {
+	return countAssistantWithThinking(parsed) > 0
+}
+
+// isMixedThinking returns true if some but not all assistant messages
+// in the conversation contain thinking blocks — indicating a switch
+// between backends with different thinking modes.
+func isMixedThinking(parsed map[string]interface{}) bool {
 	messages, ok := parsed["messages"].([]interface{})
 	if !ok {
 		return false
 	}
+	total := 0
+	withThinking := 0
+	for _, msg := range messages {
+		msgMap, ok := msg.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if role, _ := msgMap["role"].(string); role != "assistant" {
+			continue
+		}
+		total++
+		content, ok := msgMap["content"].([]interface{})
+		if !ok {
+			continue
+		}
+		for _, block := range content {
+			if blockMap, ok := block.(map[string]interface{}); ok {
+				t, _ := blockMap["type"].(string)
+				if t == "thinking" || t == "redacted_thinking" {
+					withThinking++
+					break
+				}
+			}
+		}
+	}
+	return withThinking > 0 && withThinking < total
+}
+
+// countAssistantWithThinking returns the number of assistant messages
+// that contain thinking blocks.
+func countAssistantWithThinking(parsed map[string]interface{}) int {
+	messages, ok := parsed["messages"].([]interface{})
+	if !ok {
+		return 0
+	}
+	count := 0
 	for _, msg := range messages {
 		msgMap, ok := msg.(map[string]interface{})
 		if !ok {
@@ -170,12 +283,13 @@ func hasThinkingBlocks(parsed map[string]interface{}) bool {
 			if blockMap, ok := block.(map[string]interface{}); ok {
 				t, _ := blockMap["type"].(string)
 				if t == "thinking" || t == "redacted_thinking" {
-					return true
+					count++
+					break
 				}
 			}
 		}
 	}
-	return false
+	return count
 }
 
 // processResponse handles the upstream response — normalizing SSE, tracking costs,
