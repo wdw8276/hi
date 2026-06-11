@@ -130,7 +130,7 @@ type BackendConfig struct {
 	// before forwarding. Some backends (e.g. DeepSeek) require every
 	// request in a conversation to have the same thinking enabled/disabled
 	// state, and Claude Code's tool-use requests may break this invariant.
-	// Default based on backend type: true for "deepseek", false for "anthropic".
+	// Default based on backend type: true for "anthropic", false for "deepseek".
 	StripThinking *bool `yaml:"strip_thinking,omitempty"`
 	// ContextWindow is the max context window size for this backend.
 	// Used by statusline. Default: 1M for deepseek, 200k for anthropic.
@@ -141,12 +141,12 @@ type BackendConfig struct {
 }
 
 // ShouldStripThinking returns whether the top-level "thinking" config should be
-// stripped. If unset, defaults to true for deepseek and false for anthropic.
+// stripped. If unset, defaults to true for anthropic and false for deepseek.
 func (b BackendConfig) ShouldStripThinking() bool {
 	if b.StripThinking != nil {
 		return *b.StripThinking
 	}
-	return b.Type == "deepseek"
+	return b.Type != "deepseek"
 }
 
 // ContextWindowOr returns the context window size. If unset, uses defaults.
@@ -162,9 +162,9 @@ func (b BackendConfig) ContextWindowOr() int64 {
 
 // CCEnvConfig holds environment variables passed to Claude Code.
 type CCEnvConfig struct {
-	AutoCompactWindow          int   `yaml:"auto_compact_window"`           // CLAUDE_CODE_AUTO_COMPACT_WINDOW
-	AutocompactPctOverride     int   `yaml:"autocompact_pct_override"`      // CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
-	DisableNonessentialTraffic *bool `yaml:"disable_nonessential_traffic"`  // CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+	AutoCompactWindow          int   `yaml:"auto_compact_window"`          // CLAUDE_CODE_AUTO_COMPACT_WINDOW
+	AutocompactPctOverride     int   `yaml:"autocompact_pct_override"`     // CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+	DisableNonessentialTraffic *bool `yaml:"disable_nonessential_traffic"` // CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
 }
 
 // Config is the root configuration structure.
@@ -177,15 +177,13 @@ type Config struct {
 
 // DefaultBackends returns the built-in backend definitions.
 func DefaultBackends() map[string]BackendConfig {
-	stripTrue := true
 	return map[string]BackendConfig{
 
 		"claude": {
-			Type:          "anthropic",
-			BaseURL:       "https://api.anthropic.com",
-			APIKey:        "${ANTHROPIC_API_KEY}",
-			StripThinking: &stripTrue,
-			Pricing:       PricingPerMillion{Input: 3.00, Output: 15.00},
+			Type:    "anthropic",
+			BaseURL: "https://api.anthropic.com",
+			APIKey:  "${ANTHROPIC_API_KEY}",
+			Pricing: PricingPerMillion{Input: 3.00, Output: 15.00},
 			Models: ModelMapping{
 				Opus:   "claude-opus-4-8",
 				Sonnet: "claude-sonnet-4-6",
@@ -193,11 +191,10 @@ func DefaultBackends() map[string]BackendConfig {
 			},
 		},
 		"deepseek": {
-			Type:          "deepseek",
-			BaseURL:       "https://api.deepseek.com/anthropic",
-			APIKey:        "${DEEPSEEK_API_KEY}",
-			StripThinking: &stripTrue,
-			Pricing:       PricingPerMillion{Input: 0.42, Output: 0.83},
+			Type:    "deepseek",
+			BaseURL: "https://api.deepseek.com/anthropic",
+			APIKey:  "${DEEPSEEK_API_KEY}",
+			Pricing: PricingPerMillion{Input: 0.42, Output: 0.83},
 			Models: ModelMapping{
 				Opus:   "deepseek-v4-pro[1m]",
 				Sonnet: "deepseek-v4-pro[1m]",

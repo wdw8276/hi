@@ -121,7 +121,6 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		}
 	}
 
-
 	// Strip non-standard content blocks from messages (citations, thinking).
 	// - citations: produced by deepseek, rejected by claude/Bedrock
 	// - thinking: deepseek requires once enabled; safest to strip when switching
