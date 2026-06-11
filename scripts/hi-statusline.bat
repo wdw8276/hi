@@ -1,2 +1,2 @@
 @echo off
-py "%~dp0hi-statusline.py" %*
+"%LOCALAPPDATA%\Programs\Python\Python312\python.exe" "%~dp0hi-statusline.py" %*
