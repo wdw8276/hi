@@ -257,15 +257,25 @@ func cmdStatusline() {
 	// by CCOverride when it replaced statusLine.command with hi).
 	realScript := config.OriginalStatusCommand()
 	if realScript != "" {
+		// Split command string into executable and arguments.
+		var exe string
+		var args []string
+		if strings.Contains(realScript, " ") {
+			parts := strings.Fields(realScript)
+			exe = parts[0]
+			args = parts[1:]
+		} else {
+			exe = realScript
+		}
 		// Look up in PATH if it's a bare name.
-		if !strings.Contains(realScript, "/") && !strings.Contains(realScript, "\\") {
-			if p, err := exec.LookPath(realScript); err == nil {
-				realScript = p
+		if !strings.Contains(exe, "/") && !strings.Contains(exe, "\\") {
+			if p, err := exec.LookPath(exe); err == nil {
+				exe = p
 			}
 		}
-		logx.Debug("statusline: delegating to %s", realScript)
+		logx.Debug("statusline: delegating to %s %v", exe, args)
 
-		cmd := exec.Command(realScript)
+		cmd := exec.Command(exe, args...)
 		cmd.Stdin = bytes.NewReader(stdinData)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

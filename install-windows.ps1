@@ -65,7 +65,7 @@ if ($Tag) {
                 Write-Host "Downloading helper scripts..."
 
                 $ScriptBase = "https://raw.githubusercontent.com/$Repo/main/scripts"
-                $Scripts = @("hi-statusline")
+                $Scripts = @("hi-statusline.py")
                 foreach ($Script in $Scripts) {
                     $ScriptDest = Join-Path $InstallDir $Script
                     try {
