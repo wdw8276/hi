@@ -100,7 +100,8 @@ def main():
     if used_pct is not None:
         pct_int = int(used_pct)
         if current_tokens is not None and ctx_size > 0:
-            ctx_str = f"ctx:{fmt_k(current_tokens)}/{fmt_k(ctx_size)} ({pct_int}%)"
+            compact_win = int(round(current_tokens / used_pct * 100)) if used_pct > 0 else ctx_size
+            ctx_str = f"ctx:{fmt_k(current_tokens)}/{fmt_k(ctx_size)} | compact:{pct_int}%({fmt_k(compact_win)})"
         else:
             ctx_str = f"ctx:{pct_int}%"
     else:
