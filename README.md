@@ -43,7 +43,7 @@ protocol, making it a universal multi-backend proxy.
 
 | Feature | Status |
 |---------|--------|
-| Claude Code version | Tested up to **2.1.168** (latest) |
+| Claude Code version | Tested up to **2.1.172** |
 | Hot-switch backends | ✅ Claude, DeepSeek, and all custom backends |
 | Web Search | ✅ Works on all supported models |
 
