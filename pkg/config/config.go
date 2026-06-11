@@ -401,6 +401,11 @@ func CCOverride(vars map[string]string, overrideStatusline bool) (restore func()
 		return func() {}, err
 	}
 
+	// Strip UTF-8 BOM if present (PowerShell Set-Content -Encoding UTF8 adds one).
+	if len(data) >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF {
+		data = data[3:]
+	}
+
 	// Deep copy for backup.
 	backup := make([]byte, len(data))
 	copy(backup, data)
