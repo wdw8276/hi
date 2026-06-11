@@ -62,6 +62,21 @@ if ($Tag) {
                     $env:Path = "$env:Path;$InstallDir"
                 }
                 Write-Host ""
+                Write-Host "Downloading helper scripts..."
+
+                $ScriptBase = "https://raw.githubusercontent.com/$Repo/main/scripts"
+                $Scripts = @("hi-statusline")
+                foreach ($Script in $Scripts) {
+                    $ScriptDest = Join-Path $InstallDir $Script
+                    try {
+                        Invoke-WebRequest -Uri "$ScriptBase/$Script" -OutFile $ScriptDest -ErrorAction Stop
+                        Write-Host "  + $Script"
+                    } catch {
+                        Write-Host "  ! $Script : download failed ($($_.Exception.Message))"
+                    }
+                }
+
+                Write-Host ""
                 Write-Host "Quick start:"
                 Write-Host "  1. hi init-config      (auto-detects settings)"
                 Write-Host "  2. Edit ~/.hi/config.yaml if needed"
