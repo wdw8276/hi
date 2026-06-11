@@ -98,6 +98,22 @@ if errorlevel 1 (
 )
 
 echo.
+echo Downloading helper scripts...
+set SCRIPT_BASE=https://raw.githubusercontent.com/%REPO%/main/scripts
+curl -fsSL "%SCRIPT_BASE%/hi-statusline.py" -o "%INSTALL_DIR%\hi-statusline.py"
+if exist "%INSTALL_DIR%\hi-statusline.py" (
+    echo   + hi-statusline.py
+) else (
+    echo   ! hi-statusline.py : download failed
+)
+curl -fsSL "%SCRIPT_BASE%/hi-statusline.bat" -o "%INSTALL_DIR%\hi-statusline.bat"
+if exist "%INSTALL_DIR%\hi-statusline.bat" (
+    echo   + hi-statusline.bat
+) else (
+    echo   ! hi-statusline.bat : download failed
+)
+
+echo.
 echo Quick start:
 echo   1. hi init-config    ^(auto-detects settings^)
 echo   2. Edit ~/.hi/config.yaml if needed
