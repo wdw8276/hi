@@ -181,6 +181,11 @@ First run of `hi status` auto-generates `~/.hi/config.yaml`:
 active_backend: deepseek
 proxy_port: 18799
 
+env:
+  auto_compact_window: 200000       # CLAUDE_CODE_AUTO_COMPACT_WINDOW
+  autocompact_pct_override: 64      # CLAUDE_AUTOCOMPACT_PCT_OVERRIDE (64% × 200K = 128K trigger)
+  disable_nonessential_traffic: true  # CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+
 backends:
   claude:
     type: anthropic
@@ -292,6 +297,10 @@ Key points:
 - `pricing` — USD per 1M tokens, used by cost tracking
 - `context_window` — max context window size in tokens for statusline display. Default: ``1000000`` for `deepseek`, ``200000`` for other types
 - `reasoning_effort` — sets `output_config.effort` for deepseek backends: `max` / `high`. Empty to disable. Default: empty
+- `env` — environment variables passed to Claude Code at launch:
+  - `auto_compact_window` — auto-compact trigger window. Default: ``200000``
+  - `autocompact_pct_override` — compact at this percentage of window. Default: ``64`` (128K trigger)
+  - `disable_nonessential_traffic` — disable product telemetry. Default: ``true``
 
 > **DeepSeek 1M context window**: for the official DeepSeek API, append
 > ``[1m]`` to the model name to unlock the 1M‑token context window. Write

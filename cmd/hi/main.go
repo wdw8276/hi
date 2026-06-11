@@ -246,9 +246,6 @@ func cmdStatusline() {
 			if bc, ok := cfg.Backends[activeBackend]; ok {
 				if cw, ok := obj["context_window"].(map[string]interface{}); ok {
 					cw["context_window_size"] = float64(bc.ContextWindowOr())
-					// Remove raw token counts so the script falls back to
-					// used_percentage × context_window_size.
-					delete(cw, "current_usage")
 				}
 			}
 			if patched, err := json.Marshal(obj); err == nil {
@@ -404,6 +401,9 @@ func cmdLaunch() {
 	env = filterEnv(env, "ANTHROPIC_AUTH_TOKEN")
 	env = filterEnv(env, "ANTHROPIC_MODEL")
 	env = append(env,
+		fmt.Sprintf("CLAUDE_CODE_AUTO_COMPACT_WINDOW=%d", cfg.Env.AutoCompactWindow),
+		fmt.Sprintf("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=%d", cfg.Env.AutocompactPctOverride),
+		fmt.Sprintf("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=%d", boolToInt(cfg.Env.DisableNonessentialTraffic)),
 		fmt.Sprintf("ANTHROPIC_BASE_URL=%s", proxyURL),
 		fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", apiKey),
 		fmt.Sprintf("ANTHROPIC_MODEL=%s", cfg.Backends[backend].Models.Sonnet),
@@ -493,6 +493,9 @@ func cmdAgent() {
 	env = filterEnv(env, "ANTHROPIC_AUTH_TOKEN")
 	env = filterEnv(env, "ANTHROPIC_MODEL")
 	env = append(env,
+		fmt.Sprintf("CLAUDE_CODE_AUTO_COMPACT_WINDOW=%d", cfg.Env.AutoCompactWindow),
+		fmt.Sprintf("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=%d", cfg.Env.AutocompactPctOverride),
+		fmt.Sprintf("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=%d", boolToInt(cfg.Env.DisableNonessentialTraffic)),
 		fmt.Sprintf("ANTHROPIC_BASE_URL=%s", proxyURL),
 		fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", apiKey),
 		fmt.Sprintf("ANTHROPIC_MODEL=%s", bc.Models.Sonnet),
@@ -631,4 +634,11 @@ func filterEnv(env []string, key string) []string {
 		filtered = append(filtered, e)
 	}
 	return filtered
+}
+
+func boolToInt(b *bool) int {
+	if b != nil && *b {
+		return 1
+	}
+	return 0
 }

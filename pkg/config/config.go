@@ -160,11 +160,19 @@ func (b BackendConfig) ContextWindowOr() int64 {
 	return 200_000 // 200k for anthropic and others
 }
 
+// CCEnvConfig holds environment variables passed to Claude Code.
+type CCEnvConfig struct {
+	AutoCompactWindow          int   `yaml:"auto_compact_window"`           // CLAUDE_CODE_AUTO_COMPACT_WINDOW
+	AutocompactPctOverride     int   `yaml:"autocompact_pct_override"`      // CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+	DisableNonessentialTraffic *bool `yaml:"disable_nonessential_traffic"`  // CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
+}
+
 // Config is the root configuration structure.
 type Config struct {
 	ActiveBackend string                   `yaml:"active_backend"`
 	ProxyPort     int                      `yaml:"proxy_port"`
 	Backends      map[string]BackendConfig `yaml:"backends"`
+	Env           CCEnvConfig              `yaml:"env"`
 }
 
 // DefaultBackends returns the built-in backend definitions.
@@ -201,10 +209,16 @@ func DefaultBackends() map[string]BackendConfig {
 
 // DefaultConfig returns a Config with sensible defaults.
 func DefaultConfig() *Config {
+	disableTraffic := true
 	return &Config{
 		ActiveBackend: "deepseek",
 		ProxyPort:     18799,
 		Backends:      DefaultBackends(),
+		Env: CCEnvConfig{
+			AutoCompactWindow:          200000,
+			AutocompactPctOverride:     64,
+			DisableNonessentialTraffic: &disableTraffic,
+		},
 	}
 }
 
@@ -260,6 +274,15 @@ func Load() (*Config, error) {
 	}
 	if cfg.ActiveBackend == "" {
 		cfg.ActiveBackend = defaults.ActiveBackend
+	}
+	if cfg.Env.AutoCompactWindow == 0 {
+		cfg.Env.AutoCompactWindow = defaults.Env.AutoCompactWindow
+	}
+	if cfg.Env.AutocompactPctOverride == 0 {
+		cfg.Env.AutocompactPctOverride = defaults.Env.AutocompactPctOverride
+	}
+	if cfg.Env.DisableNonessentialTraffic == nil {
+		cfg.Env.DisableNonessentialTraffic = defaults.Env.DisableNonessentialTraffic
 	}
 
 	return cfg, nil
