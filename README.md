@@ -2,10 +2,10 @@
 
 # hi
 
-**Zero‑intrusion multi‑backend proxy for Claude Code.** No Claude Code
-modifications, no forks, no plugins. hi sits between Claude Code and
-the network — intercepting only API calls — and restores everything on
-exit. Your Claude Code stays vanilla.
+**Transparent multi-backend proxy for Claude Code — simple, fast, reliable, and
+elastic.** No Claude Code modifications, no forks, no plugins. hi sits between
+Claude Code and the network — intercepting only API calls — and restores
+everything on exit. Your Claude Code stays vanilla.
 
 Connect to **any** Anthropic‑compatible API. Officially supports **Claude**,
 **DeepSeek**, **MiniMax**, **GLM**, **Kimi**, **Qwen**, **MIMO**, OpenRouter,
@@ -434,61 +434,6 @@ Claude Code status bar refresh (every 120s)
 echo '{"model":{},"workspace":{},"context_window":{},"cost":{}}' | hi statusline
 # 📁 tmp | 🤖 deepseek-v4-pro | 🧠 ctx:-- | 💰 $0.010
 ```
-
-### Standalone statusline (without hi proxy)
-
-If you only want the status bar display and don't need the full hi proxy, you
-can use the standalone scripts directly. They show directory, model, context
-usage, cache hit rate, and cost — all read from Claude Code's stdin JSON.
-
-**Linux / macOS:**
-
-Download `hi-statusline.py` and configure `~/.claude/settings.json`:
-
-```bash
-# Download the script
-curl -fsSLo ~/.local/bin/hi-statusline.py \
-  https://raw.githubusercontent.com/mars-base/hi/main/scripts/hi-statusline.py
-chmod +x ~/.local/bin/hi-statusline.py
-```
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "python3 ~/.local/bin/hi-statusline.py"
-  }
-}
-```
-
-> Tip: replace `python3` with the full path if your system needs it
-> (e.g. `/usr/bin/python3`).
-
-**Windows:**
-
-Download both `hi-statusline.py` and `hi-statusline.bat`, then configure
-`%USERPROFILE%\.claude\settings.json`:
-
-```powershell
-# Download the scripts
-$BinDir = "$env:USERPROFILE\.local\bin"
-New-Item -ItemType Directory -Path $BinDir -Force -ErrorAction SilentlyContinue | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/mars-base/hi/main/scripts/hi-statusline.py" -OutFile "$BinDir\hi-statusline.py"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/mars-base/hi/main/scripts/hi-statusline.bat" -OutFile "$BinDir\hi-statusline.bat"
-```
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "C:/Users/<your-username>/.local/bin/hi-statusline.bat"
-  }
-}
-```
-
-The `.bat` wrapper uses `%LOCALAPPDATA%\Programs\Python\Python312\python.exe`
-as the Python path. If your Python is installed elsewhere, edit the `.bat` file
-and update the path.
 
 ## Control endpoints
 
