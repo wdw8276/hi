@@ -11,26 +11,40 @@ import (
 )
 
 // transformRequestBody remaps model names and strips thinking blocks before forwarding.
-func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName string, backend Backend) []byte {
+// Returns the transformed body and the original model name (for response restoration).
+func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName string, backend Backend) ([]byte, string) {
 	if !isModel || len(body) == 0 {
-		return body
+		return body, ""
 	}
 
 	var parsed map[string]interface{}
 	if err := json.Unmarshal(body, &parsed); err != nil {
 		// Not valid JSON — pass through.
-		return body
+		return body, ""
 	}
 
 	changed := false
+	var originalModel string
 
 	// Remap model name.
 	if model, ok := parsed["model"].(string); ok {
+		originalModel = model
 		mapped := backend.MapModel(model)
 		if mapped != model {
 			parsed["model"] = mapped
 			changed = true
 			logx.Debug("Model remap: %s → %s", model, mapped)
+		} else if claudeModel, ok := ps.reverseModelMap[model]; ok {
+			// Model didn't match a Claude name (e.g. "deepseek-v4-pro" left over
+			// from a previous backend). Reverse-lookup the canonical Claude model
+			// name, then forward-map to the current backend.
+			originalModel = claudeModel // Track the canonical Claude model name
+			mapped = backend.MapModel(claudeModel)
+			if mapped != model {
+				parsed["model"] = mapped
+				changed = true
+				logx.Debug("Model remap (reverse): %s → %s → %s", model, claudeModel, mapped)
+			}
 		}
 		logx.Debug("  final model: %s", parsed["model"])
 	}
@@ -188,12 +202,12 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 	}
 
 	if !changed {
-		return body
+		return body, originalModel
 	}
 
 	newBody, err := json.Marshal(parsed)
 	if err != nil {
-		return body
+		return body, originalModel
 	}
 
 	// Debug: log thinking-related fields for deepseek backends.
@@ -213,7 +227,7 @@ func (ps *ProxyState) transformRequestBody(body []byte, isModel bool, activeName
 		logx.Debug("Final body fields -> thinking=%s context_management=%s output_config=%s", thinkInfo, ctxInfo, outInfo)
 	}
 
-	return newBody
+	return newBody, originalModel
 }
 
 // hasThinkingBlocks returns true if any assistant message in the
@@ -292,8 +306,9 @@ func countAssistantWithThinking(parsed map[string]interface{}) int {
 }
 
 // processResponse handles the upstream response — normalizing SSE, tracking costs,
-// and writing back to the client.
-func (ps *ProxyState) processResponse(w http.ResponseWriter, r *http.Request, resp *http.Response, backend Backend) {
+// and writing back to the client. originalModel is the model name from the request
+// that should be restored in the response so Claude Code sees its own naming.
+func (ps *ProxyState) processResponse(w http.ResponseWriter, r *http.Request, resp *http.Response, backend Backend, originalModel string) {
 	contentType := resp.Header.Get("Content-Type")
 
 	isSSE := strings.Contains(contentType, "text/event-stream")
@@ -304,16 +319,17 @@ func (ps *ProxyState) processResponse(w http.ResponseWriter, r *http.Request, re
 	logx.Debug("processResponse: content-type=%s sse=%v json=%v", contentType, isSSE, isJSON)
 
 	if isSSE {
-		ps.processSSEResponse(w, resp, backendName)
+		ps.processSSEResponse(w, resp, backendName, originalModel)
 	} else if isJSON {
-		ps.processJSONResponse(w, resp, backendName)
+		ps.processJSONResponse(w, resp, backendName, originalModel)
 	} else {
 		ps.processPassthrough(w, resp)
 	}
 }
 
 // processSSEResponse streams an SSE response with usage normalization.
-func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Response, backendName string) {
+// originalModel is restored in message_start events so Claude Code sees its own model name.
+func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Response, backendName string, originalModel string) {
 	// Copy headers.
 	ps.copyHeaders(w, resp)
 	w.WriteHeader(resp.StatusCode)
@@ -341,7 +357,7 @@ func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Respo
 			event := eventBuf.String()
 			eventBuf.Reset()
 
-			fixedEvent := ps.normalizeSSEEvent(event, &inputTokens, &outputTokens)
+			fixedEvent := ps.normalizeSSEEvent(event, &inputTokens, &outputTokens, originalModel)
 			w.Write([]byte(fixedEvent))
 			flusher.Flush()
 		}
@@ -349,7 +365,7 @@ func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Respo
 
 	// Flush remaining buffer.
 	if eventBuf.Len() > 0 {
-		fixedEvent := ps.normalizeSSEEvent(eventBuf.String(), &inputTokens, &outputTokens)
+		fixedEvent := ps.normalizeSSEEvent(eventBuf.String(), &inputTokens, &outputTokens, originalModel)
 		w.Write([]byte(fixedEvent))
 		flusher.Flush()
 	}
@@ -366,7 +382,8 @@ func (ps *ProxyState) processSSEResponse(w http.ResponseWriter, resp *http.Respo
 }
 
 // normalizeSSEEvent ensures usage fields exist in message_start and message_delta events.
-func (ps *ProxyState) normalizeSSEEvent(event string, inputTokens *int64, outputTokens *int64) string {
+// originalModel is restored in message_start events so Claude Code sees its own model name.
+func (ps *ProxyState) normalizeSSEEvent(event string, inputTokens *int64, outputTokens *int64, originalModel string) string {
 	// Find the data: line.
 	dataPrefix := "data: "
 	idx := strings.Index(event, dataPrefix)
@@ -397,6 +414,14 @@ func (ps *ProxyState) normalizeSSEEvent(event string, inputTokens *int64, output
 	switch eventType {
 	case "message_start":
 		if msg, ok := parsed["message"].(map[string]interface{}); ok {
+			// Restore the original model name so Claude Code sees its own naming.
+			if originalModel != "" {
+				if backendModel, _ := msg["model"].(string); backendModel != "" && backendModel != originalModel {
+					msg["model"] = originalModel
+					changed = true
+					logx.Debug("Response model restored: %s → %s", backendModel, originalModel)
+				}
+			}
 			if _, hasUsage := msg["usage"]; !hasUsage {
 				msg["usage"] = map[string]interface{}{
 					"input_tokens":  0,
@@ -451,7 +476,8 @@ func (ps *ProxyState) normalizeSSEEvent(event string, inputTokens *int64, output
 }
 
 // processJSONResponse handles non-streaming JSON responses.
-func (ps *ProxyState) processJSONResponse(w http.ResponseWriter, resp *http.Response, backendName string) {
+// originalModel is restored so Claude Code sees its own model name.
+func (ps *ProxyState) processJSONResponse(w http.ResponseWriter, resp *http.Response, backendName string, originalModel string) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		ps.copyHeaders(w, resp)
@@ -463,6 +489,13 @@ func (ps *ProxyState) processJSONResponse(w http.ResponseWriter, resp *http.Resp
 	var parsed map[string]interface{}
 	if err := json.Unmarshal(bodyBytes, &parsed); err == nil {
 		if parsed["type"] == "message" {
+			// Restore the original model name so Claude Code sees its own naming.
+			if originalModel != "" {
+				if backendModel, _ := parsed["model"].(string); backendModel != "" && backendModel != originalModel {
+					parsed["model"] = originalModel
+					logx.Debug("Response model restored: %s → %s", backendModel, originalModel)
+				}
+			}
 			if _, ok := parsed["usage"]; !ok {
 				parsed["usage"] = map[string]interface{}{
 					"input_tokens":  0,

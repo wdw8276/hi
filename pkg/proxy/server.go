@@ -20,6 +20,16 @@ import (
 	"github.com/mars-base/hi/pkg/logx"
 )
 
+// Canonical Claude model names for each tier — used by reverse model lookup.
+// Iteration order matters: sonnet first because it is the most common default.
+// When multiple tiers map to the same backend model (e.g. deepseek opus AND sonnet
+// both → "deepseek-v4-pro"), the first match wins the reverse mapping.
+var tierToClaudeModel = [][2]string{
+	{"sonnet", "claude-sonnet-4-6"},
+	{"opus", "claude-opus-4-8"},
+	{"haiku", "claude-haiku-4-5-20251001"},
+}
+
 // ProxyState holds the running proxy's mutable state.
 type ProxyState struct {
 	mu sync.RWMutex
@@ -29,6 +39,11 @@ type ProxyState struct {
 
 	// backends holds all registered backends by name.
 	backends map[string]Backend
+
+	// reverseModelMap maps backend-specific model names back to canonical Claude model names.
+	// E.g. "deepseek-v4-pro" → "claude-sonnet-4-6", enabling cross-backend model remapping
+	// when Claude Code reuses a previous backend's model name in subsequent requests.
+	reverseModelMap map[string]string
 
 	// fallback is the Anthropic fallback URL for non-model requests.
 	fallback *url.URL
@@ -63,12 +78,32 @@ func NewProxyState(cfg *config.Config) (*ProxyState, error) {
 
 	fallback, _ := url.Parse("https://api.anthropic.com")
 
+	// Build reverse model map: backend model name → canonical Claude model name.
+	// This enables cross-backend remapping when Claude Code reuses a stale
+	// model name (e.g. "deepseek-v4-pro") after a backend switch.
+	// Process tiers in priority order (sonnet > opus > haiku) to handle cases
+	// where multiple tiers map to the same backend model.
+	reverseModelMap := make(map[string]string)
+	for _, entry := range tierToClaudeModel {
+		tier, claudeModel := entry[0], entry[1]
+		for _, b := range backends {
+			info := b.ModelInfo()
+			if modelName, ok := info[tier]; ok {
+				// Only set if not already present — earlier tiers take priority.
+				if _, exists := reverseModelMap[modelName]; !exists {
+					reverseModelMap[modelName] = claudeModel
+				}
+			}
+		}
+	}
+
 	ps := &ProxyState{
-		active:      cfg.ActiveBackend,
-		backends:    backends,
-		fallback:    fallback,
-		costTracker: NewCostTracker(cfg.GetPricing()),
-		startTime:   time.Now(),
+		active:          cfg.ActiveBackend,
+		backends:        backends,
+		reverseModelMap: reverseModelMap,
+		fallback:        fallback,
+		costTracker:     NewCostTracker(cfg.GetPricing()),
+		startTime:       time.Now(),
 	}
 	// Seed request counter from persisted cost data so it survives restarts.
 	ps.reqCount.Store(uint64(ps.costTracker.TotalRequests()))
@@ -198,7 +233,7 @@ func (ps *ProxyState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 
 	// Transform the request body if needed.
-	transformed := ps.transformRequestBody(bodyBytes, isModel, activeName, backend)
+	transformed, originalModel := ps.transformRequestBody(bodyBytes, isModel, activeName, backend)
 
 	// Create the upstream request.
 	upstreamReq, err := http.NewRequestWithContext(r.Context(), r.Method, upstreamURL.String(), nil)
@@ -257,8 +292,8 @@ func (ps *ProxyState) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Process the response (SSE normalization, cost tracking).
-	ps.processResponse(w, r, resp, backend)
+	// Process the response (SSE normalization, cost tracking, model name restoration).
+	ps.processResponse(w, r, resp, backend, originalModel)
 }
 
 // StartServer starts the HTTP proxy server and blocks.
