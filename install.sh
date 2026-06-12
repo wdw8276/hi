@@ -53,13 +53,15 @@ ARCHIVE="hi-${VERSION}-${OS}-${ARCH}.tar.gz"
 URL="https://github.com/$REPO/releases/download/$TAG/$ARCHIVE"
 
 echo "Downloading hi $TAG for $OS/$ARCH..."
-curl -fsSL "$URL" -o "$ARCHIVE"
-tar xzf "$ARCHIVE"
-rm -f "$ARCHIVE"
+TMPDIR=$(mktemp -d)
+curl -fsSL "$URL" -o "$TMPDIR/$ARCHIVE"
+tar xzf "$TMPDIR/$ARCHIVE" -C "$TMPDIR"
+rm -f "$TMPDIR/$ARCHIVE"
 
 # Install.
 mkdir -p "$INSTALL_DIR"
-install -m 755 "$BIN" "$INSTALL_DIR/$BIN"
+install -m 755 "$TMPDIR/$BIN" "$INSTALL_DIR/$BIN"
+rm -rf "$TMPDIR"
 
 echo ""
 echo "hi $TAG installed to $INSTALL_DIR/$BIN"
