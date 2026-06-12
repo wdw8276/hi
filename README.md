@@ -7,6 +7,8 @@ elastic.** No Claude Code modifications, no forks, no plugins. hi sits between
 Claude Code and the network — intercepting only API calls — and restores
 everything on exit. Your Claude Code stays vanilla.
 
+> ⭐ **If you like hi, please give us a star on [GitHub](https://github.com/mars-base/hi)!**
+
 Connect to **any** Anthropic‑compatible API. Officially supports **Claude**,
 **DeepSeek**, **MiniMax**, **GLM**, **Kimi**, **Qwen**, **MIMO**, OpenRouter,
 internal gateways, and custom endpoints. Hot‑switch between all of them without

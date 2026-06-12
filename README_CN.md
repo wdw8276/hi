@@ -4,6 +4,8 @@
 
 **透明的多后端 Claude Code 代理 — 简单、快速、可靠、弹性。** 不修改 Claude Code、不需要 fork、不依赖插件。hi 位于 Claude Code 和网络之间——仅拦截 API 调用——退出时恢复一切原样。你的 Claude Code 始终保持原生状态。
 
+> ⭐ **如果喜欢 hi，请在 [GitHub](https://github.com/mars-base/hi) 给我们一颗 star！**
+
 可连接**任意** Anthropic 兼容 API。官方支持 **Claude**、**DeepSeek**、**MiniMax**、
 **GLM**、**Kimi**、**Qwen**、**MIMO**、OpenRouter、内部网关和自定义端点。在同一个 session 中热切换所有后端，无需重启。
 
